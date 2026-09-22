@@ -13,7 +13,14 @@ size-level stock, cart, coupons, guest checkout, order tracking and a staff admi
 | Data      | Supabase Postgres (`hr-shoe-mart` project, ap-south-1 / Mumbai)    |
 | Auth      | Supabase email + password; customers can also check out as guests  |
 | Payments  | COD and UPI out of the box; Razorpay via a Supabase Edge Function  |
-| Hosting   | GitHub Pages, built and deployed by GitHub Actions on push to main |
+| Hosting   | GitHub Pages, served from the `gh-pages` branch (`npm run deploy`) |
+
+> The Actions workflow that would build Pages automatically lives in
+> `deploy/github-pages-workflow.yml` rather than `.github/workflows/`, because
+> the token used to create this repo has no `workflow` scope. Run
+> `gh auth refresh -s workflow`, move the file into `.github/workflows/`, add
+> `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` as repository **variables**,
+> and switch Pages to "GitHub Actions" to get push-to-deploy.
 
 ### Why the money logic lives in Postgres
 
@@ -75,6 +82,12 @@ npm run dev
 
 `src/lib/supabase.ts` falls back to the live project, so it runs with no `.env`.
 To point at a different Supabase project, copy `.env.example` to `.env`.
+
+To push a new build live:
+
+```bash
+npm run deploy
+```
 
 ## Shop details
 
