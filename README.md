@@ -11,7 +11,7 @@ size-level stock, cart, coupons, guest checkout, order tracking and a staff admi
 | --------- | ----------------------------------------------------------------- |
 | Front end | React 19 + TypeScript + Vite, Tailwind v4, HashRouter              |
 | Data      | Supabase Postgres (`hr-shoe-mart` project, ap-south-1 / Mumbai)    |
-| Auth      | Supabase email + password; customers can also check out as guests  |
+| Auth      | Supabase email + password; sign-in is required to pay              |
 | Payments  | COD and UPI out of the box; Razorpay via a Supabase Edge Function  |
 | Hosting   | GitHub Pages, served from the `gh-pages` branch (`npm run deploy`) |
 
@@ -60,9 +60,31 @@ The `razorpay` function creates the order server side and verifies the payment
 signature before marking anything paid; the checkout page shows the card option
 only once `action: "config"` reports the keys are present. No redeploy needed.
 
+## Auth URLs (one-time dashboard setting)
+
+Supabase decides where a confirmation link lands from its own **Site URL**, not
+from the app, so this has to be set once in
+[Authentication → URL Configuration](https://supabase.com/dashboard/project/fttmkanlhpvedbitbool/auth/url-configuration):
+
+- **Site URL** — `https://pareekpiyush97.github.io/hr-shoe-mart/`
+- **Redirect URLs** — add `https://pareekpiyush97.github.io/hr-shoe-mart/**`
+  and, for local work, `http://localhost:5173/**`
+
+Until that is set, confirmation mails point at `http://localhost:3000`. The
+client uses the PKCE flow so the token arrives as `?code=…` rather than in the
+URL hash, which the HashRouter owns.
+
 ## Making someone an admin
 
-Register normally on the site, then in the Supabase SQL editor:
+Emails listed in `admin_emails` become admins automatically the moment they
+register — the signup trigger reads that table while creating the profile:
+
+```sql
+insert into public.admin_emails (email, note) values ('staff@example.com', 'Shop staff');
+```
+
+The table has RLS on and no read policy, so the list never reaches the browser.
+To promote someone who already registered:
 
 ```sql
 update public.profiles

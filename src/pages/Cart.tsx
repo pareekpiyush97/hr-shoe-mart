@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { cartSubtotal, useCart } from '../lib/store'
 import { useSettings } from '../lib/settings'
+import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { inr } from '../lib/format'
 import { Alert, Empty } from '../components/ui'
@@ -10,6 +11,7 @@ import { Alert, Empty } from '../components/ui'
 export default function Cart() {
   const { lines, setQty, remove } = useCart()
   const { delivery } = useSettings()
+  const { session } = useAuth()
   const [code, setCode] = useState('')
   const [applied, setApplied] = useState<{ code: string; discount: number } | null>(null)
   const [msg, setMsg] = useState('')
@@ -154,9 +156,17 @@ export default function Cart() {
               </div>
             )}
 
-            <Link to="/checkout" className="btn-clay mt-5 w-full">
-              Checkout karein
+            <Link
+              to={session ? '/checkout' : '/login?next=/checkout'}
+              className="btn-clay mt-5 w-full"
+            >
+              {session ? 'Checkout karein' : 'Login karke checkout karein'}
             </Link>
+            {!session && (
+              <p className="mt-2 text-center text-[11px] text-inksoft">
+                Payment se pehle ek baar login — aapka bag waise hi bacha rahega.
+              </p>
+            )}
             <Link
               to="/shop"
               className="mt-3 block text-center text-sm font-semibold text-inksoft hover:text-clay"

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Loader2, ShoppingBag } from 'lucide-react'
+import { cartCount, useCart } from '../lib/store'
+import { inr } from '../lib/format'
 import { useAuth } from '../lib/auth'
 import { Alert } from '../components/ui'
 import { cx } from '../lib/format'
@@ -8,14 +10,20 @@ import { cx } from '../lib/format'
 export default function Login() {
   const { session, signIn, signUp } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const lines = useCart((s) => s.lines)
   const [mode, setMode] = useState<'in' | 'up'>('in')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [ok, setOk] = useState('')
 
+  // Sent here mid-purchase? Go back to checkout once they are signed in.
+  const next = params.get('next') ?? ''
+  const toCheckout = next === '/checkout'
+
   useEffect(() => {
-    if (session) navigate('/account', { replace: true })
-  }, [session, navigate])
+    if (session) navigate(next || '/account', { replace: true })
+  }, [session, next, navigate])
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -44,11 +52,25 @@ export default function Login() {
 
   return (
     <div className="shell max-w-md py-16">
-      <h1 className="text-center text-3xl">{mode === 'in' ? 'Welcome back' : 'Create account'}</h1>
+      <h1 className="text-center text-3xl">
+        {toCheckout ? 'Payment se pehle login' : mode === 'in' ? 'Welcome back' : 'Create account'}
+      </h1>
       <p className="mt-2 text-center text-sm text-inksoft">
-        Account se orders track karna aur address save karna aasan ho jaata hai. Guest checkout bhi
-        chalu hai.
+        {toCheckout
+          ? 'Order confirm karne ke liye account zaroori hai — isse aapka order save rehta hai aur track karna aasan ho jaata hai.'
+          : 'Account se orders track karna, address save karna aur review likhna aasan ho jaata hai.'}
       </p>
+
+      {toCheckout && lines.length > 0 && (
+        <div className="mt-5 flex items-center gap-3 rounded-xl bg-sand px-4 py-3 text-sm">
+          <ShoppingBag size={17} className="shrink-0 text-clay" />
+          <span>
+            Aapka bag surakshit hai — {cartCount(lines)} item,{' '}
+            <strong>{inr(lines.reduce((n, l) => n + l.price * l.qty, 0))}</strong>. Login karte hi
+            seedha checkout par pahunch jayenge.
+          </span>
+        </div>
+      )}
 
       <div className="mt-7 flex rounded-full bg-sand p-1">
         {(['in', 'up'] as const).map((m) => (
@@ -96,14 +118,18 @@ export default function Login() {
 
         <button disabled={busy} className="btn-clay w-full">
           {busy && <Loader2 size={16} className="animate-spin" />}
-          {mode === 'in' ? 'Login' : 'Create account'}
+          {mode === 'in'
+            ? toCheckout
+              ? 'Login aur checkout'
+              : 'Login'
+            : 'Create account'}
         </button>
       </form>
 
       <p className="mt-5 text-center text-sm text-inksoft">
-        Bina account ke order karna hai?{' '}
+        {mode === 'in' ? 'Naye hain? Upar Register par click kijiye.' : 'Pehle se account hai? Login par click kijiye.'}{' '}
         <Link to="/shop" className="font-semibold text-clay hover:underline">
-          Guest checkout
+          Ya shopping jaari rakhein
         </Link>
       </p>
     </div>

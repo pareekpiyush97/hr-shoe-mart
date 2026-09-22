@@ -7,7 +7,7 @@ import { useSettings } from '../lib/settings'
 import { useAuth } from '../lib/auth'
 import { cx, inr } from '../lib/format'
 import type { PayMethod, PlacedOrder } from '../lib/types'
-import { Alert, Empty } from '../components/ui'
+import { Alert, Empty, Spinner } from '../components/ui'
 
 declare global {
   interface Window {
@@ -29,7 +29,7 @@ function loadRazorpayScript() {
 export default function Checkout() {
   const { lines, clear } = useCart()
   const { delivery, payment, store } = useSettings()
-  const { session, profile } = useAuth()
+  const { session, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [method, setMethod] = useState<PayMethod>('cod')
@@ -56,6 +56,12 @@ export default function Checkout() {
   const discount = applied?.discount ?? 0
   const ship = subtotal - discount >= delivery.free_above ? 0 : delivery.fee
   const total = subtotal - discount + ship
+
+  // Browsing and the cart stay open to everyone; paying needs an account, so
+  // every order is tied to a customer the shop can call back.
+  useEffect(() => {
+    if (!authLoading && !session) navigate('/login?next=/checkout', { replace: true })
+  }, [authLoading, session, navigate])
 
   useEffect(() => {
     callFunction<{ configured: boolean }>('razorpay', { action: 'config' })
@@ -176,6 +182,8 @@ export default function Checkout() {
     }
   }
 
+  if (authLoading || !session) return <Spinner label="Checkout khul raha hai…" />
+
   if (lines.length === 0)
     return (
       <div className="shell py-16">
@@ -212,7 +220,7 @@ export default function Checkout() {
     <div className="shell py-10">
       <h1 className="text-3xl sm:text-4xl">Checkout</h1>
       <p className="mt-1.5 text-sm text-inksoft">
-        Account banana zaroori nahi — guest checkout chalu hai.
+        {session.user.email} se logged in — order aapke account me save ho jayega.
       </p>
 
       <form onSubmit={placeOrder} className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">

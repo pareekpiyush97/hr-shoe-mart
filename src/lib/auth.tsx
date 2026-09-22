@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { supabase } from './supabase'
+import { siteUrl, supabase } from './supabase'
 
 interface Profile {
   id: string
@@ -62,7 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName, phone } },
+          options: {
+            data: { full_name: fullName, phone },
+            // Without this the confirmation mail points at localhost.
+            emailRedirectTo: siteUrl(),
+          },
         })
         if (error) throw error
       },

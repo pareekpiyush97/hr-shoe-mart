@@ -65,7 +65,7 @@ export default function Account() {
       ) : orders.length === 0 ? (
         <Empty
           title="Abhi tak koi order nahi"
-          note="Guest checkout se kiya order yahan nahi dikhega — use Track Order page se dekhein."
+          note="Aapke saare orders yahan aa jayenge. Shop me se kuch pasand kijiye."
           action={
             <div className="mt-2 flex gap-3">
               <Link to="/shop" className="btn-clay">
