@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Leather-and-bone palette: warm neutrals, clay accent, brass highlight. */
+  --color-bone: #fbf8f3;
+  --color-sand: #f0e8db;
+  --color-sanddeep: #e2d6c3;
+  --color-ink: #16120f;
+  --color-inksoft: #4a423b;
+  --color-clay: #b14724;
+  --color-claydeep: #8e3618;
+  --color-brass: #c39b4e;
+  --color-moss: #2f6b4f;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--color-clay);
+    color: var(--color-bone);
+  }
+}
+
+/* `btn` is a @utility (not a plain class) so the variants below can @apply it. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+  .btn-primary {
+    @apply btn bg-ink text-bone hover:bg-clay;
+  }
+
+  .btn-clay {
+    @apply btn bg-clay text-bone hover:bg-claydeep;
+  }
+
+  .btn-ghost {
+    @apply btn border border-ink/15 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-bone;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-ink/35 focus:border-clay focus:ring-2 focus:ring-clay/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-semibold tracking-wide text-inksoft uppercase;
+  }
+
+  .card {
+    @apply rounded-2xl border border-ink/10 bg-white;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold tracking-[0.22em] text-clay uppercase;
+  }
+
+  .shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@keyframes hrsm-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: hrsm-marquee 34s linear infinite;
+}
+
+@keyframes hrsm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: hrsm-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .rise {
+    animation: none;
+  }
+}
+
+/* Hide number-input spinners in the admin stock fields */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
