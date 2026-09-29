@@ -37,8 +37,9 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.08;
   }
 
   ::selection {
@@ -74,11 +75,21 @@
   }
 
   .card {
-    @apply rounded-2xl border border-ink/10 bg-white;
+    @apply rounded-2xl border border-ink/8 bg-white;
   }
 
   .eyebrow {
-    @apply text-[11px] font-semibold tracking-[0.22em] text-clay uppercase;
+    @apply text-[10px] font-semibold tracking-[0.32em] text-clay uppercase;
+  }
+
+  /* A hairline in gold — the only divider the page needs. */
+  .rule-gold {
+    @apply h-px w-full border-0 bg-gradient-to-r from-brass/50 via-brass/15 to-transparent;
+  }
+
+  /* Prices belong in the display face; it makes a number look considered. */
+  .price {
+    @apply font-display text-[17px] font-medium tracking-tight;
   }
 
   .shell {
@@ -97,7 +108,7 @@
 
   /* Arch-topped frame: the lookbook device from the reference. */
   .arch {
-    border-radius: 9999px 9999px 14px 14px;
+    border-radius: 9999px 9999px 10px 10px;
     overflow: hidden;
   }
 

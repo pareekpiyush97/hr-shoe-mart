@@ -99,6 +99,48 @@ const sizesFor = (cat, gender) => {
 const q = s => "'" + String(s).replace(/'/g, "''") + "'";
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+// ---------------------------------------------------------------- pricing
+// The first pass used metro showroom prices — a Nike at Rs 11,499 is not what
+// a Bikaner counter sells. Each category gets a band a local customer would
+// recognise, and every product is placed inside its band at the same relative
+// position it held before, so the cheap ones stay cheap and the good ones stay
+// dearer. Premium labels sit in the upper half of their band.
+const PRICE_BAND = {
+  'slippers-chappal': [149, 899],
+  'sandals-floaters': [249, 999],
+  'kids-footwear': [299, 999],
+  'women-heels-flats': [349, 1199],
+  'casual-sneakers': [499, 1799],
+  'formal-shoes': [649, 1999],
+  'loafers-moccasins': [699, 1899],
+  'sports-running': [599, 2499],
+};
+const PREMIUM = new Set(['Nike', 'Adidas', 'Puma', 'Woodland', 'Red Chief', 'Mochi', 'Metro']);
+
+/** Indian retail prices end in 9 — 749, 1,299 — never 750. */
+const endIn9 = (n) => {
+  const step = n < 700 ? 50 : 100;
+  return Math.max(99, Math.round(n / step) * step - 1);
+};
+
+const repriced = (() => {
+  const byCat = {};
+  ITEMS.forEach(([cat, , , , , , price]) => (byCat[cat] ??= []).push(price));
+  Object.values(byCat).forEach((a) => a.sort((x, y) => x - y));
+
+  return ITEMS.map(([cat, brand, , , , , price]) => {
+    const [lo, hi] = PRICE_BAND[cat] ?? [299, 1499];
+    const list = byCat[cat];
+    // Where this product sat among its category's prices, 0 (cheapest) to 1.
+    const rank = list.length > 1 ? list.indexOf(price) / (list.length - 1) : 0.5;
+    const shifted = PREMIUM.has(brand) ? 0.45 + rank * 0.55 : rank * 0.7;
+    const newPrice = endIn9(lo + (hi - lo) * shifted);
+    // A believable strike-through: 55-75% above the selling price.
+    const newMrp = endIn9(newPrice * (1.55 + 0.2 * rank));
+    return { price: newPrice, mrp: newMrp };
+  });
+})();
+
 let seed = 7;
 const rnd = (a, b) => { seed = (seed * 1103515245 + 12345) % 2147483648; return a + Math.floor(seed / 2147483648 * (b - a + 1)); };
 
@@ -132,7 +174,8 @@ out.categories = cats.map(([s, n, k, o]) => ({
 // The rnd() sequence must be consumed in the original order — rating, then
 // review count, then each size's stock — so the numbers match the live data.
 ITEMS.forEach((p, i) => {
-  const [cat, brand, title, sub, gender, mrp, price, color, mat, key] = p;
+  const [cat, brand, title, sub, gender, , , color, mat, key] = p;
+  const { mrp, price } = repriced[i];
   const sl = slug(title);
   const override = PRODUCT_IMAGE_OVERRIDE[sl];
   const u = override ? pexels(override).split('?')[0] : img(key);
@@ -187,8 +230,8 @@ out.settings = {
     map: 'https://maps.google.com/?q=Station+Road+Bikaner',
   },
   delivery: {
-    fee: 49,
-    free_above: 999,
+    fee: 39,
+    free_above: 699,
     cod_extra: 0,
     eta_city: 'Same day in Bikaner city',
     eta_outside: '2-4 days across Rajasthan',
@@ -197,9 +240,9 @@ out.settings = {
 };
 
 out.coupons = [
-  { id: 'HRSM10', code: 'HRSM10', kind: 'percent', value: 10, minOrder: 999, maxDiscount: 500, isActive: true },
-  { id: 'BIKANER200', code: 'BIKANER200', kind: 'flat', value: 200, minOrder: 1499, maxDiscount: null, isActive: true },
-  { id: 'FIRST50', code: 'FIRST50', kind: 'flat', value: 50, minOrder: 499, maxDiscount: null, isActive: true },
+  { id: 'HRSM10', code: 'HRSM10', kind: 'percent', value: 10, minOrder: 699, maxDiscount: 300, isActive: true },
+  { id: 'BIKANER100', code: 'BIKANER100', kind: 'flat', value: 100, minOrder: 999, maxDiscount: null, isActive: true },
+  { id: 'FIRST50', code: 'FIRST50', kind: 'flat', value: 50, minOrder: 449, maxDiscount: null, isActive: true },
 ];
 
 const dest = path.join(__dirname, 'seed', 'catalogue.json');

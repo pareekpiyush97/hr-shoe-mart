@@ -73,19 +73,19 @@ export default function Home() {
 
         <div className="shell flex min-h-[78vh] flex-col justify-center py-20">
           <div className="rise max-w-2xl">
-            <p className="text-[11px] font-semibold tracking-[0.3em] text-brass uppercase">
+            <p className="text-[10px] font-medium tracking-[0.42em] text-brass uppercase">
               Since 1998 · Station Road, Bikaner
             </p>
-            <h1 className="mt-6 text-5xl leading-[1.02] text-bone sm:text-6xl lg:text-7xl">
+            <h1 className="mt-7 text-[52px] font-normal text-bone sm:text-6xl lg:text-[76px]">
               Bikaner ka apna
               <span className="mt-1 block italic">footwear ghar</span>
             </h1>
-            <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-bone/75">
+            <p className="mt-7 max-w-md text-[15px] leading-[1.8] text-bone/70">
               Sports shoes se lekar haath se bani Bikaneri jutti tak — 15+ bharosemand brands, asli
               maal, aur {delivery.eta_city}.
             </p>
 
-            <div className="mt-9 flex flex-wrap gap-3">
+            <div className="mt-10 flex flex-wrap gap-3">
               <Link to="/shop" className="btn-clay px-8">
                 Shop the collection <ArrowRight size={15} />
               </Link>
@@ -104,8 +104,8 @@ export default function Home() {
               ['27', 'Saal ka bharosa'],
             ].map(([v, k]) => (
               <div key={k}>
-                <dt className="font-display text-2xl font-semibold text-brass">{v}</dt>
-                <dd className="text-[10px] tracking-[0.2em] text-bone/60 uppercase">{k}</dd>
+                <dt className="font-display text-[28px] font-normal text-brass">{v}</dt>
+                <dd className="mt-1 text-[9px] tracking-[0.3em] text-bone/50 uppercase">{k}</dd>
               </div>
             ))}
           </dl>
@@ -120,7 +120,8 @@ export default function Home() {
             Festive offer — flat 10% off
           </p>
           <p className="text-xs tracking-[0.18em] text-bone/60 uppercase">
-            Code <span className="font-semibold text-brass">HRSM10</span> · ₹999 se upar
+            Code <span className="font-semibold text-brass">HRSM10</span> · ₹
+            {delivery.free_above} se upar
           </p>
         </div>
       </section>
@@ -149,12 +150,12 @@ export default function Home() {
       </section>
 
       {/* ---------------- CATEGORIES ---------------- */}
-      <section className="shell relative py-20 xl:px-16">
+      <section className="shell relative py-28 xl:px-16">
         <span className="vlabel absolute top-28 left-1 hidden xl:block">The Collection</span>
 
-        <div className="mb-12 text-center">
+        <div className="mb-14 text-center">
           <p className="eyebrow">Categories</p>
-          <h2 className="mx-auto mt-3 max-w-xl text-4xl leading-tight sm:text-5xl">
+          <h2 className="mx-auto mt-4 max-w-2xl text-[42px] sm:text-6xl">
             Aap kya <span className="italic gold">dhoondh</span> rahe hain?
           </h2>
         </div>
@@ -175,10 +176,10 @@ export default function Home() {
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
-                <p className="mt-4 font-display text-[17px] transition group-hover:text-clay">
+                <p className="mt-5 font-display text-[18px] font-normal transition-colors group-hover:text-clay">
                   {cat.name}
                 </p>
-                <p className="mt-1 inline-flex items-center gap-1 text-[10px] tracking-[0.18em] text-inksoft uppercase">
+                <p className="mt-1.5 inline-flex items-center gap-1.5 text-[9px] tracking-[0.26em] text-inksoft/70 uppercase">
                   Shop now <ArrowRight size={10} />
                 </p>
               </Link>
@@ -188,11 +189,11 @@ export default function Home() {
       </section>
 
       {/* ---------------- FEATURED ---------------- */}
-      <section className="shell pb-16">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-ink/10 pb-6">
+      <section className="shell pb-24">
+        <div className="mb-11 flex flex-wrap items-end justify-between gap-6 border-b border-brass/25 pb-7">
           <div>
             <p className="eyebrow">Handpicked</p>
-            <h2 className="mt-3 text-4xl leading-tight sm:text-5xl">
+            <h2 className="mt-4 text-[38px] sm:text-5xl">
               Is hafte ke <span className="italic gold">favourites</span>
             </h2>
           </div>
@@ -208,7 +209,7 @@ export default function Home() {
       </section>
 
       {/* ---------------- GENDER SPLIT ---------------- */}
-      <section className="shell grid gap-4 pb-16 md:grid-cols-3">
+      <section className="shell grid gap-5 pb-24 md:grid-cols-3">
         {[
           ['men', 'Men', 'Formal, sports aur daily wear', 'https://images.pexels.com/photos/12210271/pexels-photo-12210271.jpeg?auto=compress&cs=tinysrgb&w=900'],
           ['women', 'Women', 'Heels, flats, jutti aur slides', 'https://images.pexels.com/photos/34294446/pexels-photo-34294446.jpeg?auto=compress&cs=tinysrgb&w=900'],
@@ -243,7 +244,7 @@ export default function Home() {
           {[...BRANDS, ...BRANDS].map((b, i) => (
             <span
               key={i}
-              className="font-display text-xl font-semibold text-ink/35 transition hover:text-clay"
+              className="font-display text-[22px] font-normal tracking-wide text-ink/25 transition-colors hover:text-clay"
             >
               {b}
             </span>
@@ -252,11 +253,11 @@ export default function Home() {
       </section>
 
       {/* ---------------- NEW ARRIVALS ---------------- */}
-      <section className="shell py-16">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-ink/10 pb-6">
+      <section className="shell py-24">
+        <div className="mb-11 flex flex-wrap items-end justify-between gap-6 border-b border-brass/25 pb-7">
           <div>
             <p className="eyebrow">Fresh stock</p>
-            <h2 className="mt-3 text-4xl leading-tight sm:text-5xl">
+            <h2 className="mt-4 text-[38px] sm:text-5xl">
               Naya <span className="italic gold">aaya</span> hai
             </h2>
           </div>
@@ -270,7 +271,7 @@ export default function Home() {
       </section>
 
       {/* ---------------- REVIEWS ---------------- */}
-      <section className="bg-ink py-16 text-bone">
+      <section className="bg-ink py-24 text-bone">
         <div className="shell">
           <p className="eyebrow">Customers</p>
           <h2 className="mt-3 mb-10 text-4xl text-bone sm:text-5xl">
@@ -294,11 +295,11 @@ export default function Home() {
       </section>
 
       {/* ---------------- VISIT ---------------- */}
-      <section className="shell py-16">
+      <section className="shell py-24">
         <div className="grid items-center gap-8 rounded-3xl bg-sand p-8 lg:grid-cols-2 lg:p-12">
           <div>
             <p className="eyebrow">Visit us</p>
-            <h2 className="mt-3 text-4xl leading-tight sm:text-5xl">
+            <h2 className="mt-4 text-[38px] sm:text-5xl">
               Dukaan par aaiye, <span className="italic gold">pair try</span> kijiye
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-inksoft">

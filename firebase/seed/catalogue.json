@@ -187,8 +187,8 @@
    "brandSlug": "campus",
    "brandName": "Campus",
    "gender": "men",
-   "mrp": 2199,
-   "price": 1299,
+   "mrp": 1499,
+   "price": 899,
    "images": [
     "https://images.pexels.com/photos/1027130/pexels-photo-1027130.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/1027130/pexels-photo-1027130.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -221,8 +221,8 @@
    "brandSlug": "puma",
    "brandName": "Puma",
    "gender": "unisex",
-   "mrp": 3499,
-   "price": 2249,
+   "mrp": 2499,
+   "price": 1499,
    "images": [
     "https://images.pexels.com/photos/11962269/pexels-photo-11962269.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/11962269/pexels-photo-11962269.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -255,8 +255,8 @@
    "brandSlug": "nike",
    "brandName": "Nike",
    "gender": "men",
-   "mrp": 6995,
-   "price": 4799,
+   "mrp": 2899,
+   "price": 1699,
    "images": [
     "https://images.pexels.com/photos/13450843/pexels-photo-13450843.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/13450843/pexels-photo-13450843.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -289,8 +289,8 @@
    "brandSlug": "nike",
    "brandName": "Nike",
    "gender": "women",
-   "mrp": 7495,
-   "price": 5299,
+   "mrp": 3099,
+   "price": 1799,
    "images": [
     "https://images.pexels.com/photos/18202585/pexels-photo-18202585.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/18202585/pexels-photo-18202585.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -322,8 +322,8 @@
    "brandSlug": "adidas",
    "brandName": "Adidas",
    "gender": "unisex",
-   "mrp": 4999,
-   "price": 3199,
+   "mrp": 2699,
+   "price": 1599,
    "images": [
     "https://images.pexels.com/photos/29548615/pexels-photo-29548615.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/29548615/pexels-photo-29548615.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -356,8 +356,8 @@
    "brandSlug": "campus",
    "brandName": "Campus",
    "gender": "men",
-   "mrp": 1899,
-   "price": 1099,
+   "mrp": 1299,
+   "price": 799,
    "images": [
     "https://images.pexels.com/photos/31064307/pexels-photo-31064307.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31064307/pexels-photo-31064307.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -390,8 +390,8 @@
    "brandSlug": "lancer",
    "brandName": "Lancer",
    "gender": "unisex",
-   "mrp": 1599,
-   "price": 899,
+   "mrp": 799,
+   "price": 499,
    "images": [
     "https://images.pexels.com/photos/15229823/pexels-photo-15229823.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/15229823/pexels-photo-15229823.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -424,8 +424,8 @@
    "brandSlug": "sparx",
    "brandName": "Sparx",
    "gender": "unisex",
-   "mrp": 1799,
-   "price": 999,
+   "mrp": 999,
+   "price": 649,
    "images": [
     "https://images.pexels.com/photos/3375910/pexels-photo-3375910.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/3375910/pexels-photo-3375910.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -458,8 +458,8 @@
    "brandSlug": "adidas",
    "brandName": "Adidas",
    "gender": "men",
-   "mrp": 7999,
-   "price": 5499,
+   "mrp": 3699,
+   "price": 2199,
    "images": [
     "https://images.pexels.com/photos/1456733/pexels-photo-1456733.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/1456733/pexels-photo-1456733.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -492,8 +492,8 @@
    "brandSlug": "nike",
    "brandName": "Nike",
    "gender": "men",
-   "mrp": 4295,
-   "price": 2999,
+   "mrp": 3099,
+   "price": 1899,
    "images": [
     "https://images.pexels.com/photos/29096394/pexels-photo-29096394.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/29096394/pexels-photo-29096394.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -526,8 +526,8 @@
    "brandSlug": "sparx",
    "brandName": "Sparx",
    "gender": "men",
-   "mrp": 2299,
-   "price": 1349,
+   "mrp": 899,
+   "price": 599,
    "images": [
     "https://images.pexels.com/photos/29096401/pexels-photo-29096401.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/29096401/pexels-photo-29096401.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -560,8 +560,8 @@
    "brandSlug": "nike",
    "brandName": "Nike",
    "gender": "unisex",
-   "mrp": 15995,
-   "price": 11499,
+   "mrp": 4399,
+   "price": 2499,
    "images": [
     "https://images.pexels.com/photos/33957265/pexels-photo-33957265.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/33957265/pexels-photo-33957265.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -594,8 +594,8 @@
    "brandSlug": "campus",
    "brandName": "Campus",
    "gender": "women",
-   "mrp": 2999,
-   "price": 1699,
+   "mrp": 1299,
+   "price": 799,
    "images": [
     "https://images.pexels.com/photos/7880182/pexels-photo-7880182.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/7880182/pexels-photo-7880182.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -627,8 +627,8 @@
    "brandSlug": "puma",
    "brandName": "Puma",
    "gender": "women",
-   "mrp": 5499,
-   "price": 3599,
+   "mrp": 3499,
+   "price": 2099,
    "images": [
     "https://images.pexels.com/photos/9207813/pexels-photo-9207813.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/9207813/pexels-photo-9207813.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -660,8 +660,8 @@
    "brandSlug": "adidas",
    "brandName": "Adidas",
    "gender": "women",
-   "mrp": 3999,
-   "price": 2499,
+   "mrp": 2899,
+   "price": 1799,
    "images": [
     "https://images.pexels.com/photos/29342147/pexels-photo-29342147.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/29342147/pexels-photo-29342147.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -693,8 +693,8 @@
    "brandSlug": "nike",
    "brandName": "Nike",
    "gender": "men",
-   "mrp": 11295,
-   "price": 8499,
+   "mrp": 3999,
+   "price": 2299,
    "images": [
     "https://images.pexels.com/photos/32145212/pexels-photo-32145212.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/32145212/pexels-photo-32145212.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -727,8 +727,8 @@
    "brandSlug": "red-chief",
    "brandName": "Red Chief",
    "gender": "men",
-   "mrp": 4499,
-   "price": 2999,
+   "mrp": 3299,
+   "price": 1899,
    "images": [
     "https://images.pexels.com/photos/12210271/pexels-photo-12210271.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/12210271/pexels-photo-12210271.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -761,8 +761,8 @@
    "brandSlug": "mochi",
    "brandName": "Mochi",
    "gender": "men",
-   "mrp": 3999,
-   "price": 2599,
+   "mrp": 2799,
+   "price": 1699,
    "images": [
     "https://images.pexels.com/photos/13611901/pexels-photo-13611901.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/13611901/pexels-photo-13611901.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -795,8 +795,8 @@
    "brandSlug": "red-chief",
    "brandName": "Red Chief",
    "gender": "men",
-   "mrp": 4999,
-   "price": 3399,
+   "mrp": 3499,
+   "price": 1999,
    "images": [
     "https://images.pexels.com/photos/26587826/pexels-photo-26587826.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/26587826/pexels-photo-26587826.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -829,8 +829,8 @@
    "brandSlug": "metro",
    "brandName": "Metro",
    "gender": "men",
-   "mrp": 3499,
-   "price": 2199,
+   "mrp": 2599,
+   "price": 1599,
    "images": [
     "https://images.pexels.com/photos/292998/pexels-photo-292998.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/292998/pexels-photo-292998.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -863,8 +863,8 @@
    "brandSlug": "bata",
    "brandName": "Bata",
    "gender": "men",
-   "mrp": 2499,
-   "price": 1499,
+   "mrp": 1299,
+   "price": 799,
    "images": [
     "https://images.pexels.com/photos/292999/pexels-photo-292999.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/292999/pexels-photo-292999.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -897,8 +897,8 @@
    "brandSlug": "liberty",
    "brandName": "Liberty",
    "gender": "men",
-   "mrp": 2199,
-   "price": 1299,
+   "mrp": 999,
+   "price": 649,
    "images": [
     "https://images.pexels.com/photos/31785887/pexels-photo-31785887.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31785887/pexels-photo-31785887.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -931,8 +931,8 @@
    "brandSlug": "khadims",
    "brandName": "Khadims",
    "gender": "men",
-   "mrp": 2799,
-   "price": 1699,
+   "mrp": 1399,
+   "price": 899,
    "images": [
     "https://images.pexels.com/photos/31844640/pexels-photo-31844640.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31844640/pexels-photo-31844640.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -965,8 +965,8 @@
    "brandSlug": "bata",
    "brandName": "Bata",
    "gender": "men",
-   "mrp": 2999,
-   "price": 1899,
+   "mrp": 1599,
+   "price": 999,
    "images": [
     "https://images.pexels.com/photos/32644170/pexels-photo-32644170.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/32644170/pexels-photo-32644170.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -999,8 +999,8 @@
    "brandSlug": "metro",
    "brandName": "Metro",
    "gender": "men",
-   "mrp": 4299,
-   "price": 2899,
+   "mrp": 3099,
+   "price": 1799,
    "images": [
     "https://images.pexels.com/photos/37465528/pexels-photo-37465528.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/37465528/pexels-photo-37465528.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1033,8 +1033,8 @@
    "brandSlug": "mochi",
    "brandName": "Mochi",
    "gender": "men",
-   "mrp": 3999,
-   "price": 2499,
+   "mrp": 3099,
+   "price": 1799,
    "images": [
     "https://images.pexels.com/photos/10259873/pexels-photo-10259873.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/10259873/pexels-photo-10259873.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1067,8 +1067,8 @@
    "brandSlug": "metro",
    "brandName": "Metro",
    "gender": "men",
-   "mrp": 3499,
-   "price": 2299,
+   "mrp": 2699,
+   "price": 1599,
    "images": [
     "https://images.pexels.com/photos/13923530/pexels-photo-13923530.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/13923530/pexels-photo-13923530.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1101,8 +1101,8 @@
    "brandSlug": "khadims",
    "brandName": "Khadims",
    "gender": "women",
-   "mrp": 3299,
-   "price": 2099,
+   "mrp": 1599,
+   "price": 999,
    "images": [
     "https://images.pexels.com/photos/27204303/pexels-photo-27204303.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/27204303/pexels-photo-27204303.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1134,8 +1134,8 @@
    "brandSlug": "woodland",
    "brandName": "Woodland",
    "gender": "men",
-   "mrp": 3799,
-   "price": 2699,
+   "mrp": 3299,
+   "price": 1899,
    "images": [
     "https://images.pexels.com/photos/31935085/pexels-photo-31935085.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31935085/pexels-photo-31935085.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1168,8 +1168,8 @@
    "brandSlug": "bata",
    "brandName": "Bata",
    "gender": "men",
-   "mrp": 2299,
-   "price": 1399,
+   "mrp": 1099,
+   "price": 699,
    "images": [
     "https://images.pexels.com/photos/31935098/pexels-photo-31935098.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31935098/pexels-photo-31935098.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1202,8 +1202,8 @@
    "brandSlug": "liberty",
    "brandName": "Liberty",
    "gender": "men",
-   "mrp": 2799,
-   "price": 1799,
+   "mrp": 1399,
+   "price": 899,
    "images": [
     "https://images.pexels.com/photos/7413278/pexels-photo-7413278.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/7413278/pexels-photo-7413278.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1236,8 +1236,8 @@
    "brandSlug": "woodland",
    "brandName": "Woodland",
    "gender": "men",
-   "mrp": 2495,
-   "price": 1799,
+   "mrp": 1699,
+   "price": 999,
    "images": [
     "https://images.pexels.com/photos/23692992/pexels-photo-23692992.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/23692992/pexels-photo-23692992.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1269,8 +1269,8 @@
    "brandSlug": "paragon",
    "brandName": "Paragon",
    "gender": "women",
-   "mrp": 799,
-   "price": 449,
+   "mrp": 549,
+   "price": 349,
    "images": [
     "https://images.pexels.com/photos/26925248/pexels-photo-26925248.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/26925248/pexels-photo-26925248.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1302,8 +1302,8 @@
    "brandSlug": "aqualite",
    "brandName": "Aqualite",
    "gender": "women",
-   "mrp": 999,
-   "price": 599,
+   "mrp": 1099,
+   "price": 649,
    "images": [
     "https://images.pexels.com/photos/31129829/pexels-photo-31129829.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31129829/pexels-photo-31129829.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1336,7 +1336,7 @@
    "brandName": "Relaxo",
    "gender": "women",
    "mrp": 899,
-   "price": 499,
+   "price": 549,
    "images": [
     "https://images.pexels.com/photos/31129841/pexels-photo-31129841.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31129841/pexels-photo-31129841.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1368,8 +1368,8 @@
    "brandSlug": "vkc-pride",
    "brandName": "VKC Pride",
    "gender": "men",
-   "mrp": 699,
-   "price": 399,
+   "mrp": 399,
+   "price": 249,
    "images": [
     "https://images.pexels.com/photos/31451024/pexels-photo-31451024.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31451024/pexels-photo-31451024.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1401,8 +1401,8 @@
    "brandSlug": "paragon",
    "brandName": "Paragon",
    "gender": "women",
-   "mrp": 799,
-   "price": 449,
+   "mrp": 549,
+   "price": 349,
    "images": [
     "https://images.pexels.com/photos/9267585/pexels-photo-9267585.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/9267585/pexels-photo-9267585.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1434,8 +1434,8 @@
    "brandSlug": "relaxo",
    "brandName": "Relaxo",
    "gender": "women",
-   "mrp": 599,
-   "price": 349,
+   "mrp": 249,
+   "price": 149,
    "images": [
     "https://images.pexels.com/photos/17740568/pexels-photo-17740568.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/17740568/pexels-photo-17740568.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1467,8 +1467,8 @@
    "brandSlug": "aqualite",
    "brandName": "Aqualite",
    "gender": "women",
-   "mrp": 699,
-   "price": 399,
+   "mrp": 499,
+   "price": 299,
    "images": [
     "https://images.pexels.com/photos/37305535/pexels-photo-37305535.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/37305535/pexels-photo-37305535.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1500,8 +1500,8 @@
    "brandSlug": "bata",
    "brandName": "Bata",
    "gender": "unisex",
-   "mrp": 999,
-   "price": 649,
+   "mrp": 649,
+   "price": 399,
    "images": [
     "https://images.pexels.com/photos/12969102/pexels-photo-12969102.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/12969102/pexels-photo-12969102.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1533,8 +1533,8 @@
    "brandSlug": "khadims",
    "brandName": "Khadims",
    "gender": "unisex",
-   "mrp": 1899,
-   "price": 1199,
+   "mrp": 1099,
+   "price": 649,
    "images": [
     "https://images.pexels.com/photos/35056828/pexels-photo-35056828.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/35056828/pexels-photo-35056828.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1566,8 +1566,8 @@
    "brandSlug": "khadims",
    "brandName": "Khadims",
    "gender": "women",
-   "mrp": 1599,
-   "price": 999,
+   "mrp": 899,
+   "price": 549,
    "images": [
     "https://images.pexels.com/photos/34787523/pexels-photo-34787523.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/34787523/pexels-photo-34787523.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1599,8 +1599,8 @@
    "brandSlug": "bata",
    "brandName": "Bata",
    "gender": "kids",
-   "mrp": 1299,
-   "price": 799,
+   "mrp": 1199,
+   "price": 699,
    "images": [
     "https://images.pexels.com/photos/15668369/pexels-photo-15668369.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/15668369/pexels-photo-15668369.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1634,8 +1634,8 @@
    "brandSlug": "campus",
    "brandName": "Campus",
    "gender": "kids",
-   "mrp": 1299,
-   "price": 749,
+   "mrp": 1099,
+   "price": 649,
    "images": [
     "https://images.pexels.com/photos/17895637/pexels-photo-17895637.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/17895637/pexels-photo-17895637.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1669,8 +1669,8 @@
    "brandSlug": "aqualite",
    "brandName": "Aqualite",
    "gender": "kids",
-   "mrp": 799,
-   "price": 449,
+   "mrp": 549,
+   "price": 349,
    "images": [
     "https://images.pexels.com/photos/18188548/pexels-photo-18188548.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/18188548/pexels-photo-18188548.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1704,8 +1704,8 @@
    "brandSlug": "action",
    "brandName": "Action",
    "gender": "kids",
-   "mrp": 699,
-   "price": 399,
+   "mrp": 449,
+   "price": 299,
    "images": [
     "https://images.pexels.com/photos/35753260/pexels-photo-35753260.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/35753260/pexels-photo-35753260.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1739,8 +1739,8 @@
    "brandSlug": "khadims",
    "brandName": "Khadims",
    "gender": "kids",
-   "mrp": 1199,
-   "price": 699,
+   "mrp": 999,
+   "price": 599,
    "images": [
     "https://images.pexels.com/photos/39256094/pexels-photo-39256094.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/39256094/pexels-photo-39256094.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1774,8 +1774,8 @@
    "brandSlug": "nike",
    "brandName": "Nike",
    "gender": "kids",
-   "mrp": 4995,
-   "price": 3299,
+   "mrp": 1699,
+   "price": 999,
    "images": [
     "https://images.pexels.com/photos/4987523/pexels-photo-4987523.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/4987523/pexels-photo-4987523.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1809,8 +1809,8 @@
    "brandSlug": "aqualite",
    "brandName": "Aqualite",
    "gender": "kids",
-   "mrp": 799,
-   "price": 449,
+   "mrp": 549,
+   "price": 349,
    "images": [
     "https://images.pexels.com/photos/31884726/pexels-photo-31884726.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/31884726/pexels-photo-31884726.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1844,8 +1844,8 @@
    "brandSlug": "bata",
    "brandName": "Bata",
    "gender": "kids",
-   "mrp": 1099,
-   "price": 649,
+   "mrp": 799,
+   "price": 499,
    "images": [
     "https://images.pexels.com/photos/29737094/pexels-photo-29737094.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/29737094/pexels-photo-29737094.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1879,8 +1879,8 @@
    "brandSlug": "mochi",
    "brandName": "Mochi",
    "gender": "women",
-   "mrp": 3499,
-   "price": 2199,
+   "mrp": 2099,
+   "price": 1199,
    "images": [
     "https://images.pexels.com/photos/26975778/pexels-photo-26975778.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/26975778/pexels-photo-26975778.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1912,8 +1912,8 @@
    "brandSlug": "metro",
    "brandName": "Metro",
    "gender": "women",
-   "mrp": 2999,
-   "price": 1899,
+   "mrp": 1599,
+   "price": 999,
    "images": [
     "https://images.pexels.com/photos/34294446/pexels-photo-34294446.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/34294446/pexels-photo-34294446.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1945,8 +1945,8 @@
    "brandSlug": "khadims",
    "brandName": "Khadims",
    "gender": "women",
-   "mrp": 2499,
-   "price": 1499,
+   "mrp": 549,
+   "price": 349,
    "images": [
     "https://images.pexels.com/photos/4376757/pexels-photo-4376757.jpeg?auto=compress&cs=tinysrgb&w=1000",
     "https://images.pexels.com/photos/4376757/pexels-photo-4376757.jpeg?auto=compress&cs=tinysrgb&w=1000&h=1000&fit=crop"
@@ -1980,8 +1980,8 @@
    "map": "https://maps.google.com/?q=Station+Road+Bikaner"
   },
   "delivery": {
-   "fee": 49,
-   "free_above": 999,
+   "fee": 39,
+   "free_above": 699,
    "cod_extra": 0,
    "eta_city": "Same day in Bikaner city",
    "eta_outside": "2-4 days across Rajasthan"
@@ -1998,16 +1998,16 @@
    "code": "HRSM10",
    "kind": "percent",
    "value": 10,
-   "minOrder": 999,
-   "maxDiscount": 500,
+   "minOrder": 699,
+   "maxDiscount": 300,
    "isActive": true
   },
   {
-   "id": "BIKANER200",
-   "code": "BIKANER200",
+   "id": "BIKANER100",
+   "code": "BIKANER100",
    "kind": "flat",
-   "value": 200,
-   "minOrder": 1499,
+   "value": 100,
+   "minOrder": 999,
    "maxDiscount": null,
    "isActive": true
   },
@@ -2016,7 +2016,7 @@
    "code": "FIRST50",
    "kind": "flat",
    "value": 50,
-   "minOrder": 499,
+   "minOrder": 449,
    "maxDiscount": null,
    "isActive": true
   }

@@ -40,8 +40,8 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50">
       {/* Crimson trust ticker — the shop's promises, always moving. */}
-      <div className="overflow-hidden bg-clay text-bone">
-        <div className="ticker-track flex w-max items-center gap-0 py-2 whitespace-nowrap">
+      <div className="overflow-hidden bg-ink text-bone/70">
+        <div className="ticker-track flex w-max items-center gap-0 py-2.5 whitespace-nowrap">
           {[0, 1].map((pass) => (
             <span key={pass} className="flex items-center">
               {[
@@ -55,10 +55,10 @@ export default function Header() {
               ].map((t) => (
                 <span
                   key={t}
-                  className="flex items-center text-[10.5px] font-medium tracking-[0.16em] uppercase"
+                  className="flex items-center text-[9.5px] font-medium tracking-[0.28em] uppercase"
                 >
                   {t}
-                  <span className="mx-6 text-brass">◆</span>
+                  <span className="mx-7 text-brass/70">◆</span>
                 </span>
               ))}
             </span>
@@ -151,8 +151,9 @@ export default function Header() {
                 {l.label}
               </NavLink>
             ))}
-            <span className="ml-auto text-[12px] text-clay">
-              Coupon <strong>HRSM10</strong> — 10% off above ₹999
+            <span className="ml-auto text-[11px] tracking-[0.12em] text-clay uppercase">
+              Coupon <strong className="font-semibold">HRSM10</strong> — 10% off above ₹
+              {delivery.free_above}
             </span>
           </div>
         </nav>
