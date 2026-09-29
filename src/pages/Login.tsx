@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Loader2, ShoppingBag } from 'lucide-react'
+import { Loader2, MessageCircle, ShoppingBag } from 'lucide-react'
 import { cartCount, useCart } from '../lib/store'
 import { inr } from '../lib/format'
 import { authMessage, useAuth } from '../lib/auth'
+import { firebaseReady } from '../lib/firebase'
+import { useSettings, waLink } from '../lib/settings'
 import { Alert } from '../components/ui'
 import { cx } from '../lib/format'
 
@@ -12,6 +14,7 @@ export default function Login() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const lines = useCart((s) => s.lines)
+  const { store } = useSettings()
   const [mode, setMode] = useState<'in' | 'up'>('in')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -49,6 +52,37 @@ export default function Login() {
       setBusy(false)
     }
   }
+
+  if (!firebaseReady)
+    return (
+      <div className="shell max-w-md py-16 text-center">
+        <h1 className="text-3xl">Account abhi shuru nahi hua</h1>
+        <p className="mt-3 text-sm leading-relaxed text-inksoft">
+          Online account aur payment par kaam chal raha hai. Tab tak order karna utna hi aasan hai
+          — cart bhar kar checkout par jaaiye, poora order WhatsApp par chala jayega aur hum
+          confirm kar denge.
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3">
+          <Link to={lines.length ? '/checkout' : '/shop'} className="btn-clay">
+            {lines.length ? `Checkout par jaayein · ${cartCount(lines)} item` : 'Shopping shuru karein'}
+          </Link>
+          <a
+            href={waLink(store.whatsapp, `Namaste ${store.name}! Mujhe kuch poochhna tha.`)}
+            target="_blank"
+            rel="noreferrer"
+            className="btn bg-moss text-bone hover:brightness-110"
+          >
+            <MessageCircle size={16} /> Seedha WhatsApp karein
+          </a>
+        </div>
+
+        <p className="mt-6 text-xs text-inksoft">
+          Purana order dekhna hai? <Link to="/track" className="font-semibold text-clay hover:underline">Track order</Link> se
+          order number aur mobile daal kar dekh sakte hain.
+        </p>
+      </div>
+    )
 
   return (
     <div className="shell max-w-md py-16">

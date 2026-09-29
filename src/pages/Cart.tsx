@@ -4,6 +4,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react'
 import { cartSubtotal, useCart } from '../lib/store'
 import { useSettings } from '../lib/settings'
 import { useAuth } from '../lib/auth'
+import { firebaseReady } from '../lib/firebase'
 import { previewCoupon } from '../lib/db'
 import { inr } from '../lib/format'
 import { Alert, Empty } from '../components/ui'
@@ -153,12 +154,12 @@ export default function Cart() {
             )}
 
             <Link
-              to={user ? '/checkout' : '/login?next=/checkout'}
+              to={user || !firebaseReady ? '/checkout' : '/login?next=/checkout'}
               className="btn-clay mt-5 w-full"
             >
-              {user ? 'Checkout karein' : 'Login karke checkout karein'}
+              {user || !firebaseReady ? 'Checkout karein' : 'Login karke checkout karein'}
             </Link>
-            {!user && (
+            {!user && firebaseReady && (
               <p className="mt-2 text-center text-[11px] text-inksoft">
                 Payment se pehle ek baar login — aapka bag waise hi bacha rahega.
               </p>

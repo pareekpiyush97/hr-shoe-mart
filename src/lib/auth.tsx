@@ -119,6 +119,10 @@ export function authMessage(e: unknown): string {
     'auth/weak-password': 'Password kam se kam 6 characters ka rakhiye.',
     'auth/too-many-requests': 'Bahut baar koshish ho gayi. Thodi der baad try kijiye.',
     'auth/network-request-failed': 'Internet connection check kijiye.',
+    'auth/api-key-not-valid.-please-pass-a-valid-api-key.':
+      'Login abhi shuru nahi hua hai — order WhatsApp par bhej dijiye.',
+    'auth/invalid-api-key': 'Login abhi shuru nahi hua hai — order WhatsApp par bhej dijiye.',
+    'auth/operation-not-allowed': 'Email login abhi chalu nahi hai.',
   }
   return map[code] ?? (e as Error)?.message ?? 'Kuch gadbad ho gayi.'
 }

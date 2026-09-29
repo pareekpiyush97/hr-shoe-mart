@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Banknote, CreditCard, Loader2, Lock, QrCode } from 'lucide-react'
+import { Banknote, CreditCard, Loader2, Lock, MessageCircle, QrCode } from 'lucide-react'
 import { placeOrder as submitOrder, previewCoupon, razorpayConfig, razorpayCreate, razorpayVerify } from '../lib/db'
 import { cartSubtotal, useCart } from '../lib/store'
-import { useSettings } from '../lib/settings'
+import { useSettings, waLink } from '../lib/settings'
 import { useAuth } from '../lib/auth'
+import { firebaseReady } from '../lib/firebase'
 import { cx, inr } from '../lib/format'
 import type { PayMethod, PlacedOrder } from '../lib/types'
 import { Alert, Empty, Spinner } from '../components/ui'
@@ -60,6 +61,7 @@ export default function Checkout() {
   // Browsing and the cart stay open to everyone; paying needs an account, so
   // every order is tied to a customer the shop can call back.
   useEffect(() => {
+    if (!firebaseReady) return
     if (!authLoading && !user) navigate('/login?next=/checkout', { replace: true })
   }, [authLoading, user, navigate])
 
@@ -98,8 +100,31 @@ export default function Checkout() {
     }
   }
 
+  /**
+   * While the Firebase project is still being set up there is no server to
+   * take an order, so the same form composes a WhatsApp message instead. The
+   * shop can fulfil it by hand, and nobody hits a dead end.
+   */
+  function orderOnWhatsApp(e: React.FormEvent) {
+    e.preventDefault()
+    const lines_ = lines
+      .map((l) => `• ${l.title} — size ${l.size} × ${l.qty} = ${inr(l.price * l.qty)}`)
+      .join('\n')
+    const text =
+      `Namaste ${store.name}! Mujhe ye order chahiye:\n\n${lines_}\n\n` +
+      `Total: ${inr(total)}${applied ? ` (coupon ${applied.code} lagakar)` : ''}\n\n` +
+      `Naam: ${form.name}\nMobile: ${form.phone}\n` +
+      `Pata: ${form.line1}${form.line2 ? `, ${form.line2}` : ''}, ${form.city}, ${form.state} — ${form.pincode}` +
+      (form.notes ? `\nNote: ${form.notes}` : '')
+
+    window.open(waLink(store.whatsapp, text), '_blank', 'noopener')
+    clear()
+    navigate('/', { state: { sentToWhatsApp: true } })
+  }
+
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault()
+    if (!firebaseReady) return orderOnWhatsApp(e)
     setErr('')
     setBusy(true)
     try {
@@ -175,7 +200,7 @@ export default function Checkout() {
     }
   }
 
-  if (authLoading || !user) return <Spinner label="Checkout khul raha hai…" />
+  if (firebaseReady && (authLoading || !user)) return <Spinner label="Checkout khul raha hai…" />
 
   if (lines.length === 0)
     return (
@@ -213,7 +238,9 @@ export default function Checkout() {
     <div className="shell py-10">
       <h1 className="text-3xl sm:text-4xl">Checkout</h1>
       <p className="mt-1.5 text-sm text-inksoft">
-        {user.email} se logged in — order aapke account me save ho jayega.
+        {user
+          ? `${user.email} se logged in — order aapke account me save ho jayega.`
+          : 'Order WhatsApp par bhejein — hum turant confirm kar denge.'}
       </p>
 
       <form onSubmit={placeOrder} className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
@@ -287,7 +314,19 @@ export default function Checkout() {
 
           <section className="card p-6">
             <h2 className="mb-4 text-xl">Payment method</h2>
-            <div className="space-y-3">
+
+            {!firebaseReady && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl bg-moss/10 p-4 text-sm text-moss">
+                <MessageCircle size={18} className="mt-0.5 shrink-0" />
+                <span>
+                  Online payment abhi shuru nahi hua hai. Aap yahi form bhar dijiye — order seedha
+                  hamare WhatsApp par aa jayega aur hum confirm karke bhej denge. Payment delivery
+                  par ya UPI se.
+                </span>
+              </div>
+            )}
+
+            <div className={cx('space-y-3', !firebaseReady && 'pointer-events-none opacity-40')}>
               {methods.map((m) => (
                 <label
                   key={m.id}
@@ -400,10 +439,17 @@ export default function Checkout() {
               </div>
             )}
 
-            <button disabled={busy} className="btn-clay mt-5 w-full">
+            <button
+              disabled={busy}
+              className={cx('mt-5 w-full', firebaseReady ? 'btn-clay' : 'btn bg-moss text-bone hover:brightness-110')}
+            >
               {busy ? (
                 <>
                   <Loader2 size={16} className="animate-spin" /> Processing…
+                </>
+              ) : !firebaseReady ? (
+                <>
+                  <MessageCircle size={16} /> WhatsApp par order bhejein · {inr(total)}
                 </>
               ) : method === 'razorpay' ? (
                 <>
@@ -414,8 +460,9 @@ export default function Checkout() {
               )}
             </button>
             <p className="mt-3 text-center text-[11px] text-inksoft">
-              Order place karte hi stock reserve ho jaata hai. Prices aur stock server par verify
-              hote hain.
+              {firebaseReady
+                ? 'Order place karte hi stock reserve ho jaata hai. Prices aur stock server par verify hote hain.'
+                : 'Aapka poora order WhatsApp me likha hua chala jayega — kuch dobara type nahi karna padega.'}
             </p>
           </div>
         </aside>
