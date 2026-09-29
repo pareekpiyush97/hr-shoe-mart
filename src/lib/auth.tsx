@@ -75,13 +75,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signUp(email, password, fullName, phone) {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password)
         await updateProfile(cred.user, { displayName: fullName })
-        // onUserCreate also writes this document; merging here means the name
-        // and phone are present immediately rather than a moment later.
+        // onUserCreate writes this too; doing it here as well means the name
+        // and phone are there immediately, and a trigger failure never leaves
+        // a customer without a profile. Rules pin role to 'customer'.
         await setDoc(
           doc(db, 'profiles', cred.user.uid),
-          { fullName, phone, email: email.trim().toLowerCase() },
+          { fullName, phone, email: email.trim().toLowerCase(), role: 'customer' },
           { merge: true },
-        )
+        ).catch(() => {})
+        // onUserCreate may have just granted an admin claim; the token minted
+        // a moment ago does not carry it, so refresh before the app reads it.
+        await new Promise((r) => setTimeout(r, 1200))
+        await cred.user.getIdToken(true).catch(() => {})
+
         // Verification is optional for shopping — it never blocks checkout.
         sendEmailVerification(cred.user).catch(() => {})
       },

@@ -67,13 +67,20 @@ service cloud.firestore {
     // ---------- customer data ----------
     match /profiles/{uid} {
       allow read: if isOwner(uid) || isAdmin();
-      // A customer may fix their own name and phone, but may never hand
-      // themselves the admin role.
+
+      // Sign-up writes this document from the client as well as from the
+      // onUserCreate trigger, so a trigger failure never leaves a customer
+      // without a profile. Writing role:'admin' here would buy nothing —
+      // isAdmin() reads the token claim, which only the server can set — but
+      // it is pinned to 'customer' anyway so the document cannot mislead.
+      allow create: if isOwner(uid) && request.resource.data.role == 'customer';
+
+      // Afterwards a customer may fix their own name and phone, nothing else.
       allow update: if isOwner(uid)
                     && request.resource.data.role == resource.data.role
                     && request.resource.data.diff(resource.data)
                          .affectedKeys().hasOnly(['fullName', 'phone', 'updatedAt']);
-      allow create, delete: if false;
+      allow delete: if false;
     }
 
     match /addresses/{uid}/items/{addressId} {

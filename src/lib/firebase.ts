@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
+import { connectFunctionsEmulator, getFunctions, httpsCallable } from 'firebase/functions'
 
 // These values are meant to be public — Firestore security rules and the
 // Cloud Functions are what actually protect the data. Fill them from
@@ -16,14 +16,26 @@ const config = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-export const firebaseReady = Boolean(config.apiKey && config.projectId)
+/**
+ * With VITE_USE_EMULATOR=true the whole backend runs on this machine through
+ * the Firebase emulator suite — no Google account, no Blaze plan, same code
+ * that will later be deployed. That is how the order flow is tested before
+ * the real project exists.
+ */
+const useEmulator = import.meta.env.VITE_USE_EMULATOR === 'true'
+
+export const firebaseReady = useEmulator || Boolean(config.apiKey && config.projectId)
 
 if (!firebaseReady && import.meta.env.DEV) {
   console.warn('[HR Shoe Mart] Firebase config missing — copy .env.example to .env and fill it in.')
 }
 
 const app = initializeApp(
-  firebaseReady ? config : { apiKey: 'missing', projectId: 'missing', appId: 'missing' },
+  useEmulator
+    ? { apiKey: 'demo', projectId: 'demo-hr-shoe-mart', appId: 'demo' }
+    : firebaseReady
+      ? config
+      : { apiKey: 'missing', projectId: 'missing', appId: 'missing' },
 )
 
 export const auth = getAuth(app)
@@ -31,6 +43,12 @@ export const db = getFirestore(app)
 
 // Same region the functions are deployed to, otherwise calls 404.
 export const functions = getFunctions(app, 'asia-south1')
+
+if (useEmulator) {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true })
+  connectFirestoreEmulator(db, '127.0.0.1', 8080)
+  connectFunctionsEmulator(functions, '127.0.0.1', 5001)
+}
 
 /** Typed wrapper so pages call the server the same way everywhere. */
 export async function call<TIn extends object, TOut>(name: string, payload: TIn): Promise<TOut> {

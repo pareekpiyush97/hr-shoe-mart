@@ -23,11 +23,19 @@ const here = dirname(fileURLToPath(import.meta.url))
 const keyPath = join(here, 'service-account.json')
 
 const projectId = process.env.FIREBASE_PROJECT_ID ?? null
-initializeApp(
-  existsSync(keyPath)
-    ? { credential: cert(JSON.parse(readFileSync(keyPath, 'utf8'))) }
-    : { credential: applicationDefault(), ...(projectId ? { projectId } : {}) },
-)
+
+// Against the emulator there is nothing to authenticate to, so skip credentials
+// entirely — FIRESTORE_EMULATOR_HOST is what the Admin SDK looks for.
+if (process.env.FIRESTORE_EMULATOR_HOST) {
+  initializeApp({ projectId: projectId ?? 'demo-hr-shoe-mart' })
+  console.log(`(emulator at ${process.env.FIRESTORE_EMULATOR_HOST})`)
+} else {
+  initializeApp(
+    existsSync(keyPath)
+      ? { credential: cert(JSON.parse(readFileSync(keyPath, 'utf8'))) }
+      : { credential: applicationDefault(), ...(projectId ? { projectId } : {}) },
+  )
+}
 
 const db = getFirestore()
 const data = JSON.parse(readFileSync(join(here, 'seed', 'catalogue.json'), 'utf8'))

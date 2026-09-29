@@ -13,11 +13,15 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https')
 const { setGlobalOptions } = require('firebase-functions/v2')
 const { defineSecret } = require('firebase-functions/params')
 const functionsV1 = require('firebase-functions/v1')
-const admin = require('firebase-admin')
+// Modular admin imports: firebase-admin no longer hangs FieldValue off the
+// `admin.firestore` namespace, and reaching for it there fails at runtime.
+const { initializeApp } = require('firebase-admin/app')
+const { getFirestore, FieldValue } = require('firebase-admin/firestore')
+const { getAuth } = require('firebase-admin/auth')
 const crypto = require('node:crypto')
 
-admin.initializeApp()
-const db = admin.firestore()
+initializeApp()
+const db = getFirestore()
 
 // Mumbai, same region the shop sells in.
 setGlobalOptions({ region: 'asia-south1', maxInstances: 10 })
@@ -141,7 +145,7 @@ exports.placeOrder = onCall(async (req) => {
     const total = money(subtotal - (discount ?? 0) + shippingFee)
 
     for (const w of stockWrites) {
-      tx.update(w.ref, { [`variants.${w.size}`]: admin.firestore.FieldValue.increment(-w.qty) })
+      tx.update(w.ref, { [`variants.${w.size}`]: FieldValue.increment(-w.qty) })
     }
 
     const orderRef = db.collection('orders').doc()
@@ -162,8 +166,8 @@ exports.placeOrder = onCall(async (req) => {
       paymentStatus: 'pending',
       status: 'placed',
       notes,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     })
 
     return {
@@ -269,7 +273,7 @@ exports.razorpayCreate = onCall({ secrets: [RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
   const rzp = await res.json()
   if (!res.ok) throw new HttpsError('internal', rzp?.error?.description ?? 'Razorpay order failed')
 
-  await doc.ref.update({ razorpayOrderId: rzp.id, updatedAt: admin.firestore.FieldValue.serverTimestamp() })
+  await doc.ref.update({ razorpayOrderId: rzp.id, updatedAt: FieldValue.serverTimestamp() })
 
   return {
     keyId: RAZORPAY_KEY_ID.value(),
@@ -310,7 +314,7 @@ exports.razorpayVerify = onCall({ secrets: [RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
     crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(String(razorpaySignature)))
 
   if (!ok) {
-    await doc.ref.update({ paymentStatus: 'failed', updatedAt: admin.firestore.FieldValue.serverTimestamp() })
+    await doc.ref.update({ paymentStatus: 'failed', updatedAt: FieldValue.serverTimestamp() })
     throw new HttpsError('permission-denied', 'Signature mismatch')
   }
 
@@ -319,7 +323,7 @@ exports.razorpayVerify = onCall({ secrets: [RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
     status: 'confirmed',
     razorpayPaymentId,
     razorpayOrderId,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
   })
 
   return { verified: true, orderNo: o.orderNo }
@@ -337,17 +341,19 @@ exports.onUserCreate = functionsV1
     const isAdmin = Boolean(allow?.exists)
 
     if (isAdmin) {
-      await admin.auth().setCustomUserClaims(user.uid, { admin: true })
+      await getAuth().setCustomUserClaims(user.uid, { admin: true })
     }
 
-    await db.collection('profiles').doc(user.uid).set(
-      {
-        email,
-        fullName: user.displayName ?? '',
-        phone: user.phoneNumber ?? '',
-        role: isAdmin ? 'admin' : 'customer',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    )
+    // displayName is usually not set yet when this fires, and the browser
+    // writes the real name a moment later — so only merge fields we actually
+    // have, or an empty string would clobber it.
+    const profile = {
+      email,
+      role: isAdmin ? 'admin' : 'customer',
+      createdAt: FieldValue.serverTimestamp(),
+    }
+    if (user.displayName) profile.fullName = user.displayName
+    if (user.phoneNumber) profile.phone = user.phoneNumber
+
+    await db.collection('profiles').doc(user.uid).set(profile, { merge: true })
   })

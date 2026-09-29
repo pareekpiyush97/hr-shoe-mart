@@ -127,6 +127,28 @@ Nothing in the browser can read or write that collection, and the claim can only
 be set server side, so the admin panel cannot be self-granted. Someone who
 registered before being added just needs to sign out and back in.
 
+## Running the whole backend locally
+
+The Firebase emulator suite runs Firestore, Auth and the Cloud Functions on
+this machine — no Google account, no Blaze plan, the same code that gets
+deployed. This is how the order flow was tested before the real project
+existed. It needs a JDK on the PATH (Firestore's emulator is a Java program).
+
+```bash
+npm run emu
+```
+
+```bash
+npm run emu:seed
+```
+
+```bash
+npm run dev:emu
+```
+
+The emulator UI is at http://127.0.0.1:4000. Everything is in memory, so
+stopping the emulator throws the data away — seed it again next time.
+
 ## Local development
 
 ```bash

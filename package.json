@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "deploy": "npm run build && node scripts/publish-pages.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "emu": "firebase emulators:start --only auth,firestore,functions --project demo-hr-shoe-mart",
+    "emu:seed": "node firebase/seed-emulator.mjs",
+    "dev:emu": "vite --mode emulator"
   },
   "dependencies": {
     "firebase": "^12.19.0",
@@ -25,6 +28,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "firebase-admin": "^14.5.0",
+    "firebase-tools": "^15.32.0",
     "oxlint": "^1.81.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
