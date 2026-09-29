@@ -2,43 +2,39 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LogOut, Package, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
+import { listMyOrders } from '../lib/db'
 import { inr, when } from '../lib/format'
 import { Empty, Spinner } from '../components/ui'
 import type { Order } from '../lib/types'
 
 export default function Account() {
-  const { session, profile, loading, isAdmin, signOut } = useAuth()
+  const { user, profile, loading, isAdmin, signOut } = useAuth()
   const navigate = useNavigate()
   const [orders, setOrders] = useState<Order[]>([])
   const [busy, setBusy] = useState(true)
 
   useEffect(() => {
-    if (!loading && !session) navigate('/login', { replace: true })
-  }, [loading, session, navigate])
+    if (!loading && !user) navigate('/login', { replace: true })
+  }, [loading, user, navigate])
 
   useEffect(() => {
-    if (!session) return
-    supabase
-      .from('orders')
-      .select('*, order_items(title, size, qty, price, image_url)')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setOrders((data as Order[]) ?? [])
-        setBusy(false)
-      })
-  }, [session])
+    if (!user) return
+    listMyOrders(user.uid)
+      .then(setOrders)
+      .catch(() => {})
+      .finally(() => setBusy(false))
+  }, [user])
 
-  if (loading || !session) return <Spinner />
+  if (loading || !user) return <Spinner />
 
   return (
     <div className="shell py-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl">
-            Namaste, {profile?.full_name || session.user.email?.split('@')[0]}
+            Namaste, {profile?.fullName || user.email?.split('@')[0]}
           </h1>
-          <p className="mt-1.5 text-sm text-inksoft">{session.user.email}</p>
+          <p className="mt-1.5 text-sm text-inksoft">{user.email}</p>
         </div>
         <div className="flex gap-2">
           {isAdmin && (
@@ -83,15 +79,15 @@ export default function Account() {
             <div key={o.id} className="card p-5">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/8 pb-3">
                 <div>
-                  <p className="font-display text-lg">{o.order_no}</p>
-                  <p className="text-xs text-inksoft">{when(o.created_at)}</p>
+                  <p className="font-display text-lg">{o.orderNo}</p>
+                  <p className="text-xs text-inksoft">{o.createdAt ? when(o.createdAt) : ''}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-full bg-sand px-3 py-1.5 text-xs font-semibold capitalize">
                     {o.status}
                   </span>
                   <Link
-                    to={`/track?order=${o.order_no}`}
+                    to={`/track?order=${o.orderNo}`}
                     className="text-xs font-semibold text-clay hover:underline"
                   >
                     Track
@@ -100,10 +96,10 @@ export default function Account() {
               </div>
 
               <ul className="mt-3 space-y-2">
-                {(o.order_items ?? []).map((i, k) => (
+                {(o.items ?? []).map((i, k) => (
                   <li key={k} className="flex items-center gap-3 text-sm">
                     <img
-                      src={i.image_url ?? ''}
+                      src={i.imageUrl ?? ''}
                       alt=""
                       className="h-12 w-10 rounded-lg bg-sand object-cover"
                     />
@@ -120,7 +116,7 @@ export default function Account() {
 
               <div className="mt-3 flex items-center justify-between border-t border-ink/8 pt-3">
                 <span className="flex items-center gap-1.5 text-xs text-inksoft">
-                  <Package size={13} /> {o.payment_method.toUpperCase()} · {o.payment_status}
+                  <Package size={13} /> {o.paymentMethod.toUpperCase()} · {o.paymentStatus}
                 </span>
                 <span className="font-bold">{inr(o.total)}</span>
               </div>

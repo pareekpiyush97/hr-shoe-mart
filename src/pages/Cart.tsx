@@ -4,14 +4,14 @@ import { Minus, Plus, Trash2 } from 'lucide-react'
 import { cartSubtotal, useCart } from '../lib/store'
 import { useSettings } from '../lib/settings'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
+import { previewCoupon } from '../lib/db'
 import { inr } from '../lib/format'
 import { Alert, Empty } from '../components/ui'
 
 export default function Cart() {
   const { lines, setQty, remove } = useCart()
   const { delivery } = useSettings()
-  const { session } = useAuth()
+  const { user } = useAuth()
   const [code, setCode] = useState('')
   const [applied, setApplied] = useState<{ code: string; discount: number } | null>(null)
   const [msg, setMsg] = useState('')
@@ -25,22 +25,18 @@ export default function Cart() {
   async function applyCoupon(e: React.FormEvent) {
     e.preventDefault()
     setMsg('')
-    const { data, error } = await supabase.rpc('preview_coupon', {
-      p_code: code,
-      p_subtotal: subtotal,
-    })
-    if (error) {
-      setMsg(error.message)
-      return
+    try {
+      const res = await previewCoupon(code, subtotal)
+      if (!res.ok) {
+        setApplied(null)
+        setMsg(res.reason ?? 'Coupon not valid')
+        return
+      }
+      setApplied({ code: res.code!, discount: Number(res.discount) })
+      setMsg('')
+    } catch (e) {
+      setMsg((e as Error).message)
     }
-    const res = data as { ok: boolean; reason?: string; code?: string; discount?: number }
-    if (!res.ok) {
-      setApplied(null)
-      setMsg(res.reason ?? 'Coupon not valid')
-      return
-    }
-    setApplied({ code: res.code!, discount: Number(res.discount) })
-    setMsg('')
   }
 
   if (lines.length === 0)
@@ -157,12 +153,12 @@ export default function Cart() {
             )}
 
             <Link
-              to={session ? '/checkout' : '/login?next=/checkout'}
+              to={user ? '/checkout' : '/login?next=/checkout'}
               className="btn-clay mt-5 w-full"
             >
-              {session ? 'Checkout karein' : 'Login karke checkout karein'}
+              {user ? 'Checkout karein' : 'Login karke checkout karein'}
             </Link>
-            {!session && (
+            {!user && (
               <p className="mt-2 text-center text-[11px] text-inksoft">
                 Payment se pehle ek baar login — aapka bag waise hi bacha rahega.
               </p>

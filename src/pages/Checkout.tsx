@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Banknote, CreditCard, Loader2, Lock, QrCode } from 'lucide-react'
-import { callFunction, supabase } from '../lib/supabase'
+import { placeOrder as submitOrder, previewCoupon, razorpayConfig, razorpayCreate, razorpayVerify } from '../lib/db'
 import { cartSubtotal, useCart } from '../lib/store'
 import { useSettings } from '../lib/settings'
 import { useAuth } from '../lib/auth'
@@ -29,7 +29,7 @@ function loadRazorpayScript() {
 export default function Checkout() {
   const { lines, clear } = useCart()
   const { delivery, payment, store } = useSettings()
-  const { session, profile, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const [method, setMethod] = useState<PayMethod>('cod')
@@ -60,39 +60,42 @@ export default function Checkout() {
   // Browsing and the cart stay open to everyone; paying needs an account, so
   // every order is tied to a customer the shop can call back.
   useEffect(() => {
-    if (!authLoading && !session) navigate('/login?next=/checkout', { replace: true })
-  }, [authLoading, session, navigate])
+    if (!authLoading && !user) navigate('/login?next=/checkout', { replace: true })
+  }, [authLoading, user, navigate])
 
   useEffect(() => {
-    callFunction<{ configured: boolean }>('razorpay', { action: 'config' })
+    razorpayConfig()
       .then((r) => setRzpReady(Boolean(r.configured)))
       .catch(() => setRzpReady(false))
   }, [])
 
   useEffect(() => {
-    if (!session) return
+    if (!user) return
     setForm((f) => ({
       ...f,
-      name: f.name || profile?.full_name || '',
+      name: f.name || profile?.fullName || '',
       phone: f.phone || profile?.phone || '',
-      email: f.email || session.user.email || '',
+      email: f.email || user.email || '',
     }))
-  }, [session, profile])
+  }, [user, profile])
 
   const on = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }))
 
   async function applyCoupon(e: React.FormEvent) {
     e.preventDefault()
-    const { data } = await supabase.rpc('preview_coupon', { p_code: code, p_subtotal: subtotal })
-    const res = data as { ok: boolean; reason?: string; code?: string; discount?: number }
-    if (!res?.ok) {
-      setApplied(null)
-      setCouponMsg(res?.reason ?? 'Coupon not valid')
-      return
+    try {
+      const res = await previewCoupon(code, subtotal)
+      if (!res.ok) {
+        setApplied(null)
+        setCouponMsg(res.reason ?? 'Coupon not valid')
+        return
+      }
+      setApplied({ code: res.code!, discount: Number(res.discount) })
+      setCouponMsg('')
+    } catch (e) {
+      setCouponMsg((e as Error).message)
     }
-    setApplied({ code: res.code!, discount: Number(res.discount) })
-    setCouponMsg('')
   }
 
   async function placeOrder(e: React.FormEvent) {
@@ -100,46 +103,37 @@ export default function Checkout() {
     setErr('')
     setBusy(true)
     try {
-      const { data, error } = await supabase.rpc('place_order', {
-        p: {
-          customer: { name: form.name, phone: form.phone, email: form.email },
-          address: {
-            line1: form.line1,
-            line2: form.line2,
-            city: form.city,
-            state: form.state,
-            pincode: form.pincode,
-          },
-          items: lines.map((l) => ({ slug: l.slug, size: l.size, qty: l.qty })),
-          coupon: applied?.code ?? '',
-          payment_method: method,
-          notes: form.notes,
+      const order: PlacedOrder = await submitOrder({
+        customer: { name: form.name, phone: form.phone, email: form.email },
+        address: {
+          line1: form.line1,
+          line2: form.line2,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
         },
+        items: lines.map((l) => ({ slug: l.slug, size: l.size, qty: l.qty })),
+        coupon: applied?.code ?? '',
+        paymentMethod: method,
+        notes: form.notes,
+      }).catch((e) => {
+        throw new Error(friendly((e as Error).message))
       })
-      if (error) throw new Error(friendly(error.message))
-
-      const order = data as PlacedOrder
 
       if (method === 'razorpay') {
         const ok = await loadRazorpayScript()
         if (!ok) throw new Error('Payment window load nahi hui. Internet check karke dobara try karein.')
 
-        const rzp = await callFunction<{
-          key_id: string
-          razorpay_order_id: string
-          amount: number
-          currency: string
-          customer: { name: string; contact: string; email: string }
-        }>('razorpay', { action: 'create', order_no: order.order_no })
+        const rzp = await razorpayCreate(order.orderNo)
 
         await new Promise<void>((resolve, reject) => {
           const checkout = new window.Razorpay!({
-            key: rzp.key_id,
+            key: rzp.keyId,
             amount: rzp.amount,
             currency: rzp.currency,
             name: store.name,
-            description: `Order ${order.order_no}`,
-            order_id: rzp.razorpay_order_id,
+            description: `Order ${order.orderNo}`,
+            order_id: rzp.razorpayOrderId,
             prefill: {
               name: rzp.customer.name,
               contact: rzp.customer.contact,
@@ -148,12 +142,11 @@ export default function Checkout() {
             theme: { color: '#b14724' },
             handler: async (res: Record<string, string>) => {
               try {
-                await callFunction('razorpay', {
-                  action: 'verify',
-                  order_no: order.order_no,
-                  razorpay_order_id: res.razorpay_order_id,
-                  razorpay_payment_id: res.razorpay_payment_id,
-                  razorpay_signature: res.razorpay_signature,
+                await razorpayVerify({
+                  orderNo: order.orderNo,
+                  razorpayOrderId: res.razorpay_order_id,
+                  razorpayPaymentId: res.razorpay_payment_id,
+                  razorpaySignature: res.razorpay_signature,
                 })
                 resolve()
               } catch (verifyErr) {
@@ -164,7 +157,7 @@ export default function Checkout() {
               ondismiss: () =>
                 reject(
                   new Error(
-                    `Payment cancel ho gaya. Aapka order ${order.order_no} pending hai — dobara pay karein ya COD chunein.`,
+                    `Payment cancel ho gaya. Aapka order ${order.orderNo} pending hai — dobara pay karein ya COD chunein.`,
                   ),
                 ),
             },
@@ -174,7 +167,7 @@ export default function Checkout() {
       }
 
       clear()
-      navigate(`/order/${order.order_no}`, { state: { phone: form.phone } })
+      navigate(`/order/${order.orderNo}`, { state: { phone: form.phone } })
     } catch (e) {
       setErr((e as Error).message)
     } finally {
@@ -182,7 +175,7 @@ export default function Checkout() {
     }
   }
 
-  if (authLoading || !session) return <Spinner label="Checkout khul raha hai…" />
+  if (authLoading || !user) return <Spinner label="Checkout khul raha hai…" />
 
   if (lines.length === 0)
     return (
@@ -220,7 +213,7 @@ export default function Checkout() {
     <div className="shell py-10">
       <h1 className="text-3xl sm:text-4xl">Checkout</h1>
       <p className="mt-1.5 text-sm text-inksoft">
-        {session.user.email} se logged in — order aapke account me save ho jayega.
+        {user.email} se logged in — order aapke account me save ho jayega.
       </p>
 
       <form onSubmit={placeOrder} className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">

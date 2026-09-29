@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Check, Loader2, Search } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { trackOrder } from '../lib/db'
 import { cx, inr, when } from '../lib/format'
 import { Alert } from '../components/ui'
-import type { OrderItem } from '../lib/types'
+import type { TrackedOrder } from '../lib/types'
 
 const STEPS = ['placed', 'confirmed', 'packed', 'shipped', 'delivered']
 const LABEL: Record<string, string> = {
@@ -15,26 +15,12 @@ const LABEL: Record<string, string> = {
   delivered: 'Delivered',
 }
 
-interface Tracked {
-  order_no: string
-  status: string
-  created_at: string
-  payment_method: string
-  payment_status: string
-  customer_name: string
-  shipping_address: { line1: string; line2?: string; city: string; state: string; pincode: string }
-  subtotal: number
-  discount: number
-  shipping_fee: number
-  total: number
-  items: OrderItem[]
-}
 
 export default function Track() {
   const [params] = useSearchParams()
   const [orderNo, setOrderNo] = useState(params.get('order') ?? '')
   const [phone, setPhone] = useState('')
-  const [order, setOrder] = useState<Tracked | null>(null)
+  const [order, setOrder] = useState<TrackedOrder | null>(null)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -43,20 +29,18 @@ export default function Track() {
     setErr('')
     setOrder(null)
     setBusy(true)
-    const { data, error } = await supabase.rpc('track_order', {
-      p_order_no: orderNo,
-      p_phone: phone,
-    })
-    setBusy(false)
-    if (error) {
-      setErr(error.message)
-      return
+    try {
+      const data = await trackOrder(orderNo, phone)
+      if (!data) {
+        setErr('Is order number aur mobile ke saath koi order nahi mila. Dobara check kijiye.')
+        return
+      }
+      setOrder(data)
+    } catch (e) {
+      setErr((e as Error).message)
+    } finally {
+      setBusy(false)
     }
-    if (!data) {
-      setErr('Is order number aur mobile ke saath koi order nahi mila. Dobara check kijiye.')
-      return
-    }
-    setOrder(data as Tracked)
   }
 
   const step = order ? STEPS.indexOf(order.status) : -1
@@ -106,11 +90,11 @@ export default function Track() {
         <div className="card mt-7 p-6">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/8 pb-4">
             <div>
-              <h2 className="font-display text-xl">{order.order_no}</h2>
-              <p className="text-xs text-inksoft">Placed {when(order.created_at)}</p>
+              <h2 className="font-display text-xl">{order.orderNo}</h2>
+              <p className="text-xs text-inksoft">{order.createdAt ? `Placed ${when(order.createdAt)}` : ''}</p>
             </div>
             <span className="rounded-full bg-sand px-3 py-1.5 text-xs font-semibold capitalize">
-              {order.payment_method} · {order.payment_status}
+              {order.paymentMethod} · {order.paymentStatus}
             </span>
           </div>
 
@@ -155,7 +139,7 @@ export default function Track() {
             {order.items.map((i, k) => (
               <li key={k} className="flex gap-3">
                 <img
-                  src={i.image_url ?? ''}
+                  src={i.imageUrl ?? ''}
                   alt=""
                   className="h-14 w-12 rounded-lg bg-sand object-cover"
                 />

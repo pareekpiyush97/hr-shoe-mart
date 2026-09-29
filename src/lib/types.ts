@@ -8,33 +8,33 @@ export interface Category {
   id: string
   slug: string
   name: string
-  image_url: string | null
-  sort_order: number
-  is_active: boolean
+  imageUrl: string | null
+  sortOrder: number
+  isActive: boolean
 }
 
 export interface Brand {
   id: string
   slug: string
   name: string
-  is_active: boolean
+  isActive: boolean
 }
 
-export interface Variant {
-  id: string
-  product_id: string
-  size: string
-  stock: number
-}
-
+/**
+ * Firestore has no joins, so the category and brand names live on the product,
+ * and sizes are a `{ "UK 8": 20 }` map — one read renders a whole product page,
+ * and stock can be decremented inside a single-document transaction.
+ */
 export interface Product {
   id: string
   slug: string
   title: string
   subtitle: string | null
   description: string | null
-  category_id: string | null
-  brand_id: string | null
+  categorySlug: string | null
+  categoryName: string | null
+  brandSlug: string | null
+  brandName: string | null
   gender: Gender
   mrp: number
   price: number
@@ -42,15 +42,21 @@ export interface Product {
   color: string | null
   material: string | null
   rating: number
-  review_count: number
-  is_active: boolean
-  is_featured: boolean
-  sort_order: number
-  created_at: string
-  categories?: Pick<Category, 'name' | 'slug'> | null
-  brands?: Pick<Brand, 'name' | 'slug'> | null
-  product_variants?: Variant[]
+  reviewCount: number
+  isActive: boolean
+  isFeatured: boolean
+  sortOrder: number
+  variants: Record<string, number>
 }
+
+/** Sizes in wearable order rather than the map's insertion order. */
+export const sizesOf = (p: Product) =>
+  Object.entries(p.variants ?? {}).sort(
+    (a, b) =>
+      (parseFloat(a[0].replace(/[^0-9.]/g, '')) || 0) - (parseFloat(b[0].replace(/[^0-9.]/g, '')) || 0),
+  )
+
+export const inStock = (p: Product) => Object.values(p.variants ?? {}).some((n) => n > 0)
 
 export interface CartLine {
   slug: string
@@ -65,48 +71,75 @@ export interface CartLine {
 }
 
 export interface OrderItem {
+  slug?: string
   title: string
   size: string | null
   qty: number
   price: number
-  image_url: string | null
+  imageUrl: string | null
 }
 
 export interface Order {
   id: string
-  order_no: string
-  customer_name: string
-  customer_phone: string
-  customer_email: string | null
-  shipping_address: {
+  orderNo: string
+  userId: string | null
+  customerName: string
+  customerPhone: string
+  customerEmail: string | null
+  shippingAddress: {
     line1: string
     line2?: string
     city: string
     state: string
     pincode: string
   }
+  items: OrderItem[]
   subtotal: number
   discount: number
-  shipping_fee: number
+  shippingFee: number
   total: number
-  coupon_code: string | null
-  payment_method: PayMethod
-  payment_status: PayStatus
+  couponCode: string | null
+  paymentMethod: PayMethod
+  paymentStatus: PayStatus
   status: OrderStatus
   notes: string | null
-  created_at: string
-  order_items?: OrderItem[]
+  createdAt: number | null
 }
 
 export interface PlacedOrder {
   id: string
-  order_no: string
+  orderNo: string
   subtotal: number
   discount: number
-  shipping_fee: number
+  shippingFee: number
   total: number
-  payment_method: PayMethod
-  coupon_code: string | null
+  paymentMethod: PayMethod
+  couponCode: string | null
+}
+
+export interface TrackedOrder {
+  orderNo: string
+  status: OrderStatus
+  createdAt: number | null
+  paymentMethod: PayMethod
+  paymentStatus: PayStatus
+  customerName: string
+  shippingAddress: Order['shippingAddress']
+  subtotal: number
+  discount: number
+  shippingFee: number
+  total: number
+  items: OrderItem[]
+}
+
+export interface Review {
+  id: string
+  productSlug: string
+  userId: string | null
+  name: string
+  rating: number
+  comment: string | null
+  createdAt: number | null
 }
 
 export interface StoreSettings {

@@ -3,12 +3,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Loader2, ShoppingBag } from 'lucide-react'
 import { cartCount, useCart } from '../lib/store'
 import { inr } from '../lib/format'
-import { useAuth } from '../lib/auth'
+import { authMessage, useAuth } from '../lib/auth'
 import { Alert } from '../components/ui'
 import { cx } from '../lib/format'
 
 export default function Login() {
-  const { session, signIn, signUp } = useAuth()
+  const { user, signIn, signUp } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const lines = useCart((s) => s.lines)
@@ -22,8 +22,8 @@ export default function Login() {
   const toCheckout = next === '/checkout'
 
   useEffect(() => {
-    if (session) navigate(next || '/account', { replace: true })
-  }, [session, next, navigate])
+    if (user) navigate(next || '/account', { replace: true })
+  }, [user, next, navigate])
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -41,10 +41,10 @@ export default function Login() {
           String(f.get('name')),
           String(f.get('phone')),
         )
-        setOk('Account ban gaya! Agar email confirmation on hai to inbox check kijiye.')
+        setOk('Account ban gaya! Aapko seedha checkout par le ja rahe hain.')
       }
     } catch (e) {
-      setErr((e as Error).message)
+      setErr(authMessage(e))
     } finally {
       setBusy(false)
     }

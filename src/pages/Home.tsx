@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Truck,
 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { listCategories, listFeatured, listNewest } from '../lib/db'
 import type { Category, Product } from '../lib/types'
 import ProductCard from '../components/ProductCard'
 import { ProductSkeleton } from '../components/ui'
@@ -49,17 +49,14 @@ export default function Home() {
   const { store, delivery } = useSettings()
 
   useEffect(() => {
-    const sel = '*, brands(name, slug), categories(name, slug), product_variants(id, size, stock)'
-    Promise.all([
-      supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('products').select(sel).eq('is_featured', true).limit(8),
-      supabase.from('products').select(sel).order('sort_order', { ascending: false }).limit(8),
-    ]).then(([c, f, n]) => {
-      setCats((c.data as Category[]) ?? [])
-      setFeatured((f.data as Product[]) ?? [])
-      setFresh((n.data as Product[]) ?? [])
-      setLoading(false)
-    })
+    Promise.all([listCategories(), listFeatured(8), listNewest(8)])
+      .then(([c, f, n]) => {
+        setCats(c)
+        setFeatured(f)
+        setFresh(n)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   return (
@@ -173,7 +170,7 @@ export default function Home() {
                 className="group relative aspect-square overflow-hidden rounded-2xl bg-sand"
               >
                 <img
-                  src={cat.image_url ?? ''}
+                  src={cat.imageUrl ?? ''}
                   alt={cat.name}
                   loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"

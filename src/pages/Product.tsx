@@ -9,8 +9,8 @@ import {
   ShoppingBag,
   Truck,
 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-import type { Product } from '../lib/types'
+import { addReview, getProduct, listRelated, listReviews } from '../lib/db'
+import { sizesOf, type Product, type Review } from '../lib/types'
 import { useCart, useWishlist } from '../lib/store'
 import { useSettings, waLink } from '../lib/settings'
 import { cx, day, inr, off } from '../lib/format'
@@ -18,14 +18,6 @@ import ProductCard from '../components/ProductCard'
 import Stars from '../components/Stars'
 import { Alert, Empty, Spinner, Toast } from '../components/ui'
 import { useAuth } from '../lib/auth'
-
-interface Review {
-  id: string
-  name: string
-  rating: number
-  comment: string | null
-  created_at: string
-}
 
 export default function ProductPage() {
   const { slug } = useParams()
@@ -46,7 +38,7 @@ export default function ProductPage() {
   const wished = useWishlist((s) => (slug ? s.slugs.includes(slug) : false))
   const toggleWish = useWishlist((s) => s.toggle)
   const { store, delivery } = useSettings()
-  const { session, profile } = useAuth()
+  const { user, profile } = useAuth()
 
   useEffect(() => {
     if (!slug) return
@@ -54,37 +46,20 @@ export default function ProductPage() {
     setSize('')
     setQty(1)
     setImg(0)
-    const sel = '*, brands(name, slug), categories(name, slug), product_variants(id, size, stock)'
-    supabase
-      .from('products')
-      .select(sel)
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .maybeSingle()
-      .then(async ({ data }) => {
-        const prod = data as Product | null
+
+    getProduct(slug)
+      .then(async (prod) => {
         setP(prod)
         setLoading(false)
         if (!prod) return
-
         const [rel, rev] = await Promise.all([
-          supabase
-            .from('products')
-            .select(sel)
-            .eq('category_id', prod.category_id)
-            .neq('id', prod.id)
-            .eq('is_active', true)
-            .limit(4),
-          supabase
-            .from('reviews')
-            .select('id, name, rating, comment, created_at')
-            .eq('product_id', prod.id)
-            .order('created_at', { ascending: false })
-            .limit(10),
+          listRelated(prod.categorySlug, prod.slug, 4),
+          listReviews(prod.slug, 10),
         ])
-        setRelated((rel.data as Product[]) ?? [])
-        setReviews((rev.data as Review[]) ?? [])
+        setRelated(rel)
+        setReviews(rev)
       })
+      .catch(() => setLoading(false))
   }, [slug])
 
   if (loading) return <Spinner label="Product laa rahe hain…" />
@@ -103,14 +78,10 @@ export default function ProductPage() {
       </div>
     )
 
-  const variants = [...(p.product_variants ?? [])].sort((a, b) => {
-    const na = parseFloat(a.size.replace(/[^0-9.]/g, '')) || 0
-    const nb = parseFloat(b.size.replace(/[^0-9.]/g, '')) || 0
-    return na - nb
-  })
-  const picked = variants.find((v) => v.size === size)
+  const variants = sizesOf(p)
   const discount = off(p.mrp, p.price)
-  const anyStock = variants.some((v) => v.stock > 0)
+  const picked = size ? { size, stock: p.variants?.[size] ?? 0 } : undefined
+  const anyStock = variants.some(([, stock]) => stock > 0)
 
   function addToBag(goToCart = false) {
     if (!size) {
@@ -130,7 +101,7 @@ export default function ProductPage() {
       price: Number(p!.price),
       mrp: Number(p!.mrp),
       image: p!.images[0],
-      brand: p!.brands?.name ?? '',
+      brand: p!.brandName ?? '',
       maxStock: picked.stock,
     })
     if (goToCart) navigate('/checkout')
@@ -152,27 +123,22 @@ export default function ProductPage() {
 
   async function postReview(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const form = new FormData(e.currentTarget)
-    const { error } = await supabase.from('reviews').insert({
-      product_id: p!.id,
-      user_id: session!.user.id,
-      name: profile?.full_name || session!.user.email!.split('@')[0],
-      rating: Number(form.get('rating')),
-      comment: String(form.get('comment') ?? ''),
-    })
-    if (error) {
-      setErr(error.message)
-      return
+    const form = e.currentTarget
+    const data = new FormData(form)
+    try {
+      await addReview({
+        productSlug: p!.slug,
+        userId: user!.uid,
+        name: profile?.fullName || user!.email!.split('@')[0],
+        rating: Number(data.get('rating')),
+        comment: String(data.get('comment') ?? ''),
+      })
+      setReviews(await listReviews(p!.slug, 10))
+      form.reset()
+      setToast('Review post ho gaya, dhanyavaad!')
+    } catch (e) {
+      setErr((e as Error).message)
     }
-    const { data } = await supabase
-      .from('reviews')
-      .select('id, name, rating, comment, created_at')
-      .eq('product_id', p!.id)
-      .order('created_at', { ascending: false })
-      .limit(10)
-    setReviews((data as Review[]) ?? [])
-    e.currentTarget.reset()
-    setToast('Review post ho gaya, dhanyavaad!')
   }
 
   return (
@@ -186,8 +152,8 @@ export default function ProductPage() {
           Shop
         </Link>{' '}
         /{' '}
-        <Link to={`/shop?category=${p.categories?.slug}`} className="hover:text-clay">
-          {p.categories?.name}
+        <Link to={`/shop?category=${p.categorySlug}`} className="hover:text-clay">
+          {p.categoryName}
         </Link>{' '}
         / <span className="text-ink">{p.title}</span>
       </nav>
@@ -219,7 +185,7 @@ export default function ProductPage() {
         {/* details */}
         <div>
           <p className="text-[11px] tracking-[0.18em] text-clay uppercase">
-            {p.brands?.name} · {p.gender}
+            {p.brandName} · {p.gender}
           </p>
           <h1 className="mt-2 text-3xl sm:text-4xl">{p.title}</h1>
           <p className="mt-2 text-sm text-inksoft">{p.subtitle}</p>
@@ -227,7 +193,7 @@ export default function ProductPage() {
           <div className="mt-3 flex items-center gap-2">
             <Stars value={p.rating} size={15} />
             <span className="text-sm font-medium">{p.rating.toFixed(1)}</span>
-            <span className="text-xs text-inksoft">({p.review_count} ratings)</span>
+            <span className="text-xs text-inksoft">({p.reviewCount} ratings)</span>
           </div>
 
           <div className="mt-5 flex items-end gap-3">
@@ -254,25 +220,25 @@ export default function ProductPage() {
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {variants.map((v) => (
+              {variants.map(([sz, stock]) => (
                 <button
-                  key={v.id}
-                  disabled={v.stock < 1}
+                  key={sz}
+                  disabled={stock < 1}
                   onClick={() => {
-                    setSize(v.size)
+                    setSize(sz)
                     setQty(1)
                     setErr('')
                   }}
                   className={cx(
                     'min-w-14 rounded-xl border px-3 py-2.5 text-sm font-semibold transition',
-                    v.stock < 1
+                    stock < 1
                       ? 'cursor-not-allowed border-ink/10 bg-sand/60 text-ink/25 line-through'
-                      : size === v.size
+                      : size === sz
                         ? 'border-clay bg-clay text-bone'
                         : 'border-ink/15 bg-white hover:border-ink',
                   )}
                 >
-                  {v.size}
+                  {sz}
                 </button>
               ))}
             </div>
@@ -384,12 +350,12 @@ export default function ProductPage() {
           <h2 className="text-2xl">Specifications</h2>
           <dl className="mt-4 divide-y divide-ink/8 text-sm">
             {[
-              ['Brand', p.brands?.name],
-              ['Category', p.categories?.name],
+              ['Brand', p.brandName],
+              ['Category', p.categoryName],
               ['Colour', p.color],
               ['Material', p.material],
               ['Wear for', p.gender],
-              ['Sizes available', variants.filter((v) => v.stock > 0).map((v) => v.size).join(', ') || '—'],
+              ['Sizes available', variants.filter(([, n]) => n > 0).map(([sz]) => sz).join(', ') || '—'],
             ].map(([k, v]) => (
               <div key={k as string} className="flex justify-between gap-6 py-3">
                 <dt className="text-inksoft">{k as string}</dt>
@@ -413,7 +379,7 @@ export default function ProductPage() {
               <figure key={r.id} className="card p-5">
                 <div className="flex items-center justify-between">
                   <Stars value={r.rating} />
-                  <span className="text-[11px] text-inksoft">{day(r.created_at)}</span>
+                  <span className="text-[11px] text-inksoft">{r.createdAt ? day(r.createdAt) : ''}</span>
                 </div>
                 {r.comment && <p className="mt-2.5 text-sm text-inksoft">{r.comment}</p>}
                 <figcaption className="mt-3 text-xs font-semibold">{r.name}</figcaption>
@@ -422,7 +388,7 @@ export default function ProductPage() {
           </div>
         )}
 
-        {session ? (
+        {user ? (
           <form onSubmit={postReview} className="card mt-6 max-w-lg p-5">
             <p className="label">Apna review likhein</p>
             <select name="rating" defaultValue="5" className="field mb-3">

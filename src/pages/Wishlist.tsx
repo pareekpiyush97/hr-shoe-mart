@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { listBySlugs } from '../lib/db'
 import { useWishlist } from '../lib/store'
 import type { Product } from '../lib/types'
 import ProductCard from '../components/ProductCard'
@@ -17,14 +17,10 @@ export default function Wishlist() {
       setLoading(false)
       return
     }
-    supabase
-      .from('products')
-      .select('*, brands(name, slug), categories(name, slug), product_variants(id, size, stock)')
-      .in('slug', slugs)
-      .then(({ data }) => {
-        setItems((data as Product[]) ?? [])
-        setLoading(false)
-      })
+    listBySlugs(slugs)
+      .then(setItems)
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [slugs])
 
   return (

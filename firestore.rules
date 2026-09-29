@@ -1,0 +1,121 @@
+rules_version = '2';
+
+// HR Shoe Mart — Firestore security rules.
+//
+// The rule of the house: the browser may read the catalogue and its own data,
+// and nothing else. Anything that decides money or stock (placing an order,
+// validating a coupon, verifying a payment) runs in a Cloud Function with the
+// Admin SDK, which bypasses these rules. So orders are deliberately NOT
+// client-writable — a tampered cart cannot become a cheap order.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Set as a custom claim by the onUserCreate function, from the
+    // adminEmails allowlist. Cheaper than reading a profile doc on every rule.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ---------- public catalogue ----------
+    match /categories/{slug} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /brands/{slug} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /products/{slug} {
+      allow read: if true;
+      // Admins edit price, flags and stock from the admin panel. Customer
+      // stock decrements happen in the placeOrder function, not from here.
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin();
+    }
+
+    match /settings/{key} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------- private to the server ----------
+    // Coupon codes are never listed to the browser; placeOrder applies them.
+    match /coupons/{code} {
+      allow read, write: if isAdmin();
+    }
+
+    // Who becomes an admin. No client may read or write this, ever.
+    match /adminEmails/{email} {
+      allow read, write: if false;
+    }
+
+    match /counters/{name} {
+      allow read, write: if false;
+    }
+
+    // ---------- customer data ----------
+    match /profiles/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      // A customer may fix their own name and phone, but may never hand
+      // themselves the admin role.
+      allow update: if isOwner(uid)
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['fullName', 'phone', 'updatedAt']);
+      allow create, delete: if false;
+    }
+
+    match /addresses/{uid}/items/{addressId} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /wishlist/{uid}/items/{productId} {
+      allow read, write: if isOwner(uid);
+    }
+
+    // ---------- orders ----------
+    match /orders/{orderId} {
+      // A customer sees their own orders; staff see everything.
+      allow read: if isAdmin()
+                  || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      // Never created or edited from the browser — placeOrder writes these.
+      allow create, delete: if false;
+
+      // Staff move an order along its lifecycle. Money fields stay frozen.
+      allow update: if isAdmin()
+                    && request.resource.data.total == resource.data.total
+                    && request.resource.data.subtotal == resource.data.subtotal
+                    && request.resource.data.discount == resource.data.discount
+                    && request.resource.data.items == resource.data.items;
+    }
+
+    // ---------- reviews ----------
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.rating is int
+                    && request.resource.data.rating >= 1
+                    && request.resource.data.rating <= 5
+                    && request.resource.data.comment.size() <= 600;
+      allow update, delete: if isAdmin();
+    }
+
+    // Anything not named above is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

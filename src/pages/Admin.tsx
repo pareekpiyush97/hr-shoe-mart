@@ -2,10 +2,26 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { IndianRupee, LayoutDashboard, Package, PlusCircle, Save, ShoppingCart } from 'lucide-react'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
+import {
+  adminCreateProduct,
+  adminListAllProducts,
+  adminListOrders,
+  adminSaveProduct,
+  adminSetOrderStatus,
+  adminSetStock,
+  listBrands,
+  listCategories,
+} from '../lib/db'
 import { cx, inr, when } from '../lib/format'
 import { Alert, Empty, Spinner, Toast } from '../components/ui'
-import type { Brand, Category, Order, OrderStatus, Product } from '../lib/types'
+import {
+  sizesOf,
+  type Brand,
+  type Category,
+  type Order,
+  type OrderStatus,
+  type Product,
+} from '../lib/types'
 
 const TABS = [
   ['dash', 'Dashboard', LayoutDashboard],
@@ -17,7 +33,7 @@ const TABS = [
 const STATUSES: OrderStatus[] = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled']
 
 export default function Admin() {
-  const { session, loading, isAdmin } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [tab, setTab] = useState<(typeof TABS)[number][0]>('dash')
   const [orders, setOrders] = useState<Order[]>([])
@@ -30,28 +46,21 @@ export default function Admin() {
 
   const reload = useCallback(async () => {
     const [o, p, c, b] = await Promise.all([
-      supabase
-        .from('orders')
-        .select('*, order_items(title, size, qty, price, image_url)')
-        .order('created_at', { ascending: false })
-        .limit(100),
-      supabase
-        .from('products')
-        .select('*, brands(name, slug), categories(name, slug), product_variants(id, size, stock)')
-        .order('sort_order'),
-      supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('brands').select('*').order('name'),
+      adminListOrders(100),
+      adminListAllProducts(),
+      listCategories(),
+      listBrands(),
     ])
-    setOrders((o.data as Order[]) ?? [])
-    setProducts((p.data as Product[]) ?? [])
-    setCats((c.data as Category[]) ?? [])
-    setBrands((b.data as Brand[]) ?? [])
+    setOrders(o)
+    setProducts(p)
+    setCats(c)
+    setBrands(b)
     setBusy(false)
   }, [])
 
   useEffect(() => {
-    if (!loading && !session) navigate('/login', { replace: true })
-  }, [loading, session, navigate])
+    if (!loading && !user) navigate('/login', { replace: true })
+  }, [loading, user, navigate])
 
   useEffect(() => {
     if (isAdmin) reload()
@@ -78,37 +87,44 @@ export default function Admin() {
     .reduce((n, o) => n + Number(o.total), 0)
   const pending = orders.filter((o) => ['placed', 'confirmed', 'packed'].includes(o.status)).length
   const lowStock = products.filter((p) =>
-    (p.product_variants ?? []).some((v) => v.stock > 0 && v.stock <= 3),
+    Object.values(p.variants ?? {}).some((n) => n > 0 && n <= 3),
   )
-  const outOfStock = products.filter((p) => (p.product_variants ?? []).every((v) => v.stock === 0))
+  const outOfStock = products.filter((p) =>
+    Object.values(p.variants ?? {}).every((n) => n === 0),
+  )
 
   async function setStatus(id: string, status: OrderStatus) {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', id)
-    if (error) return setErr(error.message)
-    setOrders((os) => os.map((o) => (o.id === id ? { ...o, status } : o)))
-    setToast('Order status update ho gaya')
+    try {
+      await adminSetOrderStatus(id, status)
+      setOrders((os) => os.map((o) => (o.id === id ? { ...o, status } : o)))
+      setToast('Order status update ho gaya')
+    } catch (e) {
+      setErr((e as Error).message)
+    }
   }
 
   async function saveProduct(p: Product, patch: Partial<Product>) {
-    const { error } = await supabase.from('products').update(patch).eq('id', p.id)
-    if (error) return setErr(error.message)
-    setProducts((ps) => ps.map((x) => (x.id === p.id ? { ...x, ...patch } : x)))
-    setToast(`${p.title} saved`)
+    try {
+      await adminSaveProduct(p.slug, patch)
+      setProducts((ps) => ps.map((x) => (x.id === p.id ? { ...x, ...patch } : x)))
+      setToast(`${p.title} saved`)
+    } catch (e) {
+      setErr((e as Error).message)
+    }
   }
 
-  async function saveStock(variantId: string, stock: number) {
-    const { error } = await supabase.from('product_variants').update({ stock }).eq('id', variantId)
-    if (error) return setErr(error.message)
-    setProducts((ps) =>
-      ps.map((p) => ({
-        ...p,
-        product_variants: p.product_variants?.map((v) => (v.id === variantId ? { ...v, stock } : v)),
-      })),
-    )
-    setToast('Stock update ho gaya')
+  async function saveStock(slug: string, size: string, stock: number) {
+    try {
+      await adminSetStock(slug, size, stock)
+      setProducts((ps) =>
+        ps.map((p) =>
+          p.slug === slug ? { ...p, variants: { ...p.variants, [size]: stock } } : p,
+        ),
+      )
+      setToast('Stock update ho gaya')
+    } catch (e) {
+      setErr((e as Error).message)
+    }
   }
 
   return (
@@ -154,7 +170,7 @@ export default function Admin() {
                 <Stat label="Total orders" value={String(orders.length)} />
                 <Stat label="Pending fulfilment" value={String(pending)} accent />
                 <Stat label="Revenue" value={inr(revenue)} icon />
-                <Stat label="Live products" value={String(products.filter((p) => p.is_active).length)} />
+                <Stat label="Live products" value={String(products.filter((p) => p.isActive).length)} />
               </div>
 
               <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -168,9 +184,9 @@ export default function Admin() {
                         <li key={p.id} className="flex justify-between gap-3">
                           <span className="line-clamp-1">{p.title}</span>
                           <span className="shrink-0 text-clay">
-                            {p
-                              .product_variants!.filter((v) => v.stock > 0 && v.stock <= 3)
-                              .map((v) => `${v.size}:${v.stock}`)
+                            {sizesOf(p)
+                              .filter(([, n]) => n > 0 && n <= 3)
+                              .map(([sz, n]) => `${sz}:${n}`)
                               .join(', ')}
                           </span>
                         </li>
@@ -262,19 +278,19 @@ function OrderTable({
         <div key={o.id} className="card p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="font-display text-lg">{o.order_no}</p>
-              <p className="text-xs text-inksoft">{when(o.created_at)}</p>
+              <p className="font-display text-lg">{o.orderNo}</p>
+              <p className="text-xs text-inksoft">{o.createdAt ? when(o.createdAt) : ''}</p>
               <p className="mt-1.5 text-sm">
-                {o.customer_name} ·{' '}
-                <a href={`tel:${o.customer_phone}`} className="text-clay hover:underline">
-                  {o.customer_phone}
+                {o.customerName} ·{' '}
+                <a href={`tel:${o.customerPhone}`} className="text-clay hover:underline">
+                  {o.customerPhone}
                 </a>
               </p>
               {detailed && (
                 <p className="mt-1 max-w-md text-xs text-inksoft">
-                  {o.shipping_address.line1}
-                  {o.shipping_address.line2 ? `, ${o.shipping_address.line2}` : ''},{' '}
-                  {o.shipping_address.city} — {o.shipping_address.pincode}
+                  {o.shippingAddress.line1}
+                  {o.shippingAddress.line2 ? `, ${o.shippingAddress.line2}` : ''},{' '}
+                  {o.shippingAddress.city} — {o.shippingAddress.pincode}
                 </p>
               )}
             </div>
@@ -282,7 +298,7 @@ function OrderTable({
             <div className="text-right">
               <p className="font-bold">{inr(o.total)}</p>
               <p className="text-xs text-inksoft capitalize">
-                {o.payment_method} · {o.payment_status}
+                {o.paymentMethod} · {o.paymentStatus}
               </p>
               <select
                 value={o.status}
@@ -300,9 +316,9 @@ function OrderTable({
 
           {detailed && (
             <ul className="mt-3 flex flex-wrap gap-3 border-t border-ink/8 pt-3">
-              {(o.order_items ?? []).map((i, k) => (
+              {(o.items ?? []).map((i, k) => (
                 <li key={k} className="flex items-center gap-2 rounded-lg bg-sand px-2.5 py-1.5 text-xs">
-                  <img src={i.image_url ?? ''} alt="" className="h-8 w-7 rounded object-cover" />
+                  <img src={i.imageUrl ?? ''} alt="" className="h-8 w-7 rounded object-cover" />
                   {i.title} · {i.size} × {i.qty}
                 </li>
               ))}
@@ -323,7 +339,7 @@ function ProductRow({
 }: {
   p: Product
   onSave: (p: Product, patch: Partial<Product>) => void
-  onStock: (variantId: string, stock: number) => void
+  onStock: (slug: string, size: string, stock: number) => void
 }) {
   const [price, setPrice] = useState(String(p.price))
   const [mrp, setMrp] = useState(String(p.mrp))
@@ -336,7 +352,7 @@ function ProductRow({
         <div className="min-w-48 flex-1">
           <p className="font-display text-base font-semibold">{p.title}</p>
           <p className="text-xs text-inksoft">
-            {p.brands?.name} · {p.categories?.name}
+            {p.brandName} · {p.categoryName}
           </p>
         </div>
 
@@ -362,8 +378,8 @@ function ProductRow({
         <label className="flex items-center gap-1.5 text-xs">
           <input
             type="checkbox"
-            checked={p.is_active}
-            onChange={(e) => onSave(p, { is_active: e.target.checked })}
+            checked={p.isActive}
+            onChange={(e) => onSave(p, { isActive: e.target.checked })}
             className="accent-[#b14724]"
           />
           Live
@@ -371,8 +387,8 @@ function ProductRow({
         <label className="flex items-center gap-1.5 text-xs">
           <input
             type="checkbox"
-            checked={p.is_featured}
-            onChange={(e) => onSave(p, { is_featured: e.target.checked })}
+            checked={p.isFeatured}
+            onChange={(e) => onSave(p, { isFeatured: e.target.checked })}
             className="accent-[#b14724]"
           />
           Featured
@@ -391,16 +407,16 @@ function ProductRow({
 
       {open && (
         <div className="mt-4 flex flex-wrap gap-3 border-t border-ink/8 pt-4">
-          {(p.product_variants ?? []).map((v) => (
-            <label key={v.id} className="text-xs">
-              <span className="mb-1 block text-inksoft">{v.size}</span>
+          {sizesOf(p).map(([sz, stock]) => (
+            <label key={sz} className="text-xs">
+              <span className="mb-1 block text-inksoft">{sz}</span>
               <input
                 type="number"
                 min={0}
-                defaultValue={v.stock}
+                defaultValue={stock}
                 onBlur={(e) => {
                   const n = Math.max(0, Number(e.target.value))
-                  if (n !== v.stock) onStock(v.id, n)
+                  if (n !== stock) onStock(p.slug, sz, n)
                 }}
                 className="field w-20 py-2 text-center"
               />
@@ -435,48 +451,45 @@ function NewProduct({
       .replace(/^-|-$/g, '')
     setBusy(true)
 
-    const { data, error } = await supabase
-      .from('products')
-      .insert({
+    const sizes = String(f.get('sizes'))
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    const stock = Math.max(0, Number(f.get('stock')) || 0)
+    const categorySlug = String(f.get('category'))
+    const brandSlug = String(f.get('brand'))
+
+    try {
+      // Firestore keeps the category and brand names on the product, so the
+      // storefront never has to look them up.
+      await adminCreateProduct({
         slug,
         title,
         subtitle: String(f.get('subtitle')),
         description: String(f.get('description')),
-        category_id: String(f.get('category')),
-        brand_id: String(f.get('brand')),
-        gender: String(f.get('gender')),
+        categorySlug,
+        categoryName: cats.find((c) => c.slug === categorySlug)?.name ?? null,
+        brandSlug,
+        brandName: brands.find((b) => b.slug === brandSlug)?.name ?? null,
+        gender: String(f.get('gender')) as Product['gender'],
         mrp: Number(f.get('mrp')),
         price: Number(f.get('price')),
         images: [String(f.get('image'))],
         color: String(f.get('color')),
         material: String(f.get('material')),
-        is_active: true,
+        rating: 4.5,
+        reviewCount: 0,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 999,
+        variants: Object.fromEntries(sizes.map((size) => [size, stock])),
       })
-      .select('id')
-      .single()
-
-    if (error) {
+      onDone(`${title} add ho gaya`)
+    } catch (e) {
+      onError((e as Error).message)
+    } finally {
       setBusy(false)
-      return onError(error.message)
     }
-
-    const sizes = String(f.get('sizes'))
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-    const stock = Number(f.get('stock'))
-    if (sizes.length) {
-      const { error: vErr } = await supabase
-        .from('product_variants')
-        .insert(sizes.map((size) => ({ product_id: (data as { id: string }).id, size, stock })))
-      if (vErr) {
-        setBusy(false)
-        return onError(vErr.message)
-      }
-    }
-
-    setBusy(false)
-    onDone(`${title} add ho gaya`)
   }
 
   return (

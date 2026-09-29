@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { SlidersHorizontal, X } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { listBrands, listCategories, listProducts } from '../lib/db'
 import type { Brand, Category, Product } from '../lib/types'
 import ProductCard from '../components/ProductCard'
 import { Empty, ProductSkeleton } from '../components/ui'
@@ -39,25 +39,19 @@ export default function Shop() {
   const sort = params.get('sort') ?? 'featured'
 
   useEffect(() => {
-    Promise.all([
-      supabase
-        .from('products')
-        .select('*, brands(name, slug), categories(name, slug), product_variants(id, size, stock)')
-        .eq('is_active', true)
-        .order('sort_order'),
-      supabase.from('categories').select('*').order('sort_order'),
-      supabase.from('brands').select('*').order('name'),
-    ]).then(([p, c, b]) => {
-      setProducts((p.data as Product[]) ?? [])
-      setCats((c.data as Category[]) ?? [])
-      setBrands((b.data as Brand[]) ?? [])
-      setLoading(false)
-    })
+    Promise.all([listProducts(), listCategories(), listBrands()])
+      .then(([p, c, b]) => {
+        setProducts(p)
+        setCats(c)
+        setBrands(b)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   const sizes = useMemo(() => {
     const set = new Set<string>()
-    products.forEach((p) => p.product_variants?.forEach((v) => set.add(v.size)))
+    products.forEach((p) => Object.keys(p.variants ?? {}).forEach((sz) => set.add(sz)))
     return [...set].sort((a, b) => {
       const na = parseFloat(a.replace(/[^0-9.]/g, '')) || 0
       const nb = parseFloat(b.replace(/[^0-9.]/g, '')) || 0
@@ -72,13 +66,13 @@ export default function Shop() {
 
   const shown = useMemo(() => {
     let list = products.filter((p) => {
-      if (category && p.categories?.slug !== category) return false
-      if (brand && p.brands?.slug !== brand) return false
+      if (category && p.categorySlug !== category) return false
+      if (brand && p.brandSlug !== brand) return false
       if (gender && p.gender !== gender) return false
       if (maxPrice && p.price > maxPrice) return false
-      if (size && !p.product_variants?.some((v) => v.size === size && v.stock > 0)) return false
+      if (size && !((p.variants?.[size] ?? 0) > 0)) return false
       if (q) {
-        const hay = `${p.title} ${p.subtitle ?? ''} ${p.brands?.name ?? ''} ${p.categories?.name ?? ''} ${p.color ?? ''}`.toLowerCase()
+        const hay = `${p.title} ${p.subtitle ?? ''} ${p.brandName ?? ''} ${p.categoryName ?? ''} ${p.color ?? ''}`.toLowerCase()
         if (!hay.includes(q)) return false
       }
       return true
@@ -90,7 +84,7 @@ export default function Shop() {
     else if (sort === 'rating') list.sort((a, b) => b.rating - a.rating)
     else if (sort === 'discount')
       list.sort((a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp)
-    else list.sort((a, b) => Number(b.is_featured) - Number(a.is_featured) || a.sort_order - b.sort_order)
+    else list.sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || a.sortOrder - b.sortOrder)
     return list
   }, [products, category, brand, gender, size, maxPrice, q, sort])
 

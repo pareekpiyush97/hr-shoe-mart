@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
-import type { Product } from '../lib/types'
+import { inStock as hasStock, type Product } from '../lib/types'
 import { cx, inr, off } from '../lib/format'
 import { useWishlist } from '../lib/store'
 import Stars from './Stars'
@@ -9,7 +9,7 @@ export default function ProductCard({ p }: { p: Product }) {
   const wished = useWishlist((s) => s.slugs.includes(p.slug))
   const toggle = useWishlist((s) => s.toggle)
   const discount = off(p.mrp, p.price)
-  const inStock = (p.product_variants ?? []).some((v) => v.stock > 0)
+  const inStock = hasStock(p)
 
   return (
     <article className="group relative">
@@ -44,7 +44,7 @@ export default function ProductCard({ p }: { p: Product }) {
 
       <div className="pt-3">
         <p className="text-[11px] tracking-[0.14em] text-inksoft uppercase">
-          {p.brands?.name ?? 'HR Shoe Mart'}
+          {p.brandName ?? 'HR Shoe Mart'}
         </p>
         <Link to={`/product/${p.slug}`}>
           <h3 className="mt-1 line-clamp-1 font-display text-[15px] font-semibold hover:text-clay">
@@ -53,7 +53,7 @@ export default function ProductCard({ p }: { p: Product }) {
         </Link>
         <div className="mt-1.5 flex items-center gap-2">
           <Stars value={p.rating} />
-          <span className="text-[11px] text-inksoft">({p.review_count})</span>
+          <span className="text-[11px] text-inksoft">({p.reviewCount})</span>
         </div>
         <div className="mt-2 flex items-baseline gap-2">
           <span className="text-[15px] font-bold">{inr(p.price)}</span>

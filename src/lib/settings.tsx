@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { supabase } from './supabase'
+import { loadSettings } from './db'
 import type { DeliverySettings, PaymentSettings, StoreSettings } from './types'
 
 interface SettingsValue {
@@ -36,12 +36,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [value, setValue] = useState<SettingsValue>(FALLBACK)
 
   useEffect(() => {
-    supabase
-      .from('settings')
-      .select('key, value')
-      .then(({ data }) => {
-        if (!data) return
-        const map = Object.fromEntries(data.map((r) => [r.key, r.value])) as Record<string, unknown>
+    // Falls back to the constants above if Firestore is unreachable, so the
+    // shop's address and phone never disappear from the page.
+    loadSettings()
+      .then((map) => {
         setValue({
           store: { ...FALLBACK.store, ...(map.store as StoreSettings) },
           delivery: { ...FALLBACK.delivery, ...(map.delivery as DeliverySettings) },
@@ -49,6 +47,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           ready: true,
         })
       })
+      .catch(() => {})
   }, [])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

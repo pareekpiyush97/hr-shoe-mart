@@ -18,7 +18,7 @@ const LINKS = [
 export default function Header() {
   const lines = useCart((s) => s.lines)
   const wish = useWishlist((s) => s.slugs)
-  const { session, isAdmin } = useAuth()
+  const { user, isAdmin } = useAuth()
   const { store, delivery } = useSettings()
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
@@ -93,7 +93,7 @@ export default function Header() {
               {wish.length > 0 && <Dot n={wish.length} />}
             </Link>
             <Link
-              to={session ? '/account' : '/login'}
+              to={user ? '/account' : '/login'}
               className="rounded-full p-2.5 hover:bg-sand"
               aria-label="Account"
             >
@@ -173,11 +173,11 @@ export default function Header() {
                 </Link>
               ))}
               <Link
-                to={session ? '/account' : '/login'}
+                to={user ? '/account' : '/login'}
                 onClick={() => setOpen(false)}
                 className="border-b border-ink/8 py-3.5 text-sm font-medium"
               >
-                {session ? 'My Account' : 'Login / Register'}
+                {user ? 'My Account' : 'Login / Register'}
               </Link>
               {isAdmin && (
                 <Link
