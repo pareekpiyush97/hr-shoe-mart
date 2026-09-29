@@ -89,10 +89,12 @@ const ITEMS = [
 ];
 
 const sizesFor = (cat, gender) => {
-  if (gender === 'kids') return ['10C', '11C', '12C', '13C', '1', '2', '3'];
-  if (cat === 'women-heels-flats' || gender === 'women') return ['UK 4', 'UK 5', 'UK 6', 'UK 7', 'UK 8'];
-  if (cat === 'slippers-chappal' || cat === 'sandals-floaters') return ['UK 6', 'UK 7', 'UK 8', 'UK 9', 'UK 10'];
-  return ['UK 6', 'UK 7', 'UK 8', 'UK 9', 'UK 10', 'UK 11'];
+  // India uses the UK scale, so the numbers are unchanged — only the label
+  // reads IND, which is how Campus, Bata, Sparx and the rest print it.
+  if (gender === 'kids') return ['IND 10C', 'IND 11C', 'IND 12C', 'IND 13C', 'IND 1', 'IND 2', 'IND 3'];
+  if (cat === 'women-heels-flats' || gender === 'women') return ['IND 4', 'IND 5', 'IND 6', 'IND 7', 'IND 8'];
+  if (cat === 'slippers-chappal' || cat === 'sandals-floaters') return ['IND 6', 'IND 7', 'IND 8', 'IND 9', 'IND 10'];
+  return ['IND 6', 'IND 7', 'IND 8', 'IND 9', 'IND 10', 'IND 11'];
 };
 const q = s => "'" + String(s).replace(/'/g, "''") + "'";
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -139,7 +141,7 @@ ITEMS.forEach((p, i) => {
 
   const variants = {};
   sizesFor(cat, gender).forEach((sz) => {
-    const soldOut = (i === 5 && sz === 'UK 9') || (i === 22 && sz === 'UK 7');
+    const soldOut = (i === 5 && sz === 'IND 9') || (i === 22 && sz === 'IND 7');
     variants[sz] = soldOut ? 0 : rnd(2, 28);
   });
 

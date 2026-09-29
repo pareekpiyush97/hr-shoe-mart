@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { listBrands, listCategories, listProducts } from '../lib/db'
-import type { Brand, Category, Product } from '../lib/types'
+import { shortSize, type Brand, type Category, type Product } from '../lib/types'
 import ProductCard from '../components/ProductCard'
 import { Empty, ProductSkeleton } from '../components/ui'
 import { cx, inr } from '../lib/format'
@@ -118,10 +118,10 @@ export default function Shop() {
         ))}
       </FilterBlock>
 
-      <FilterBlock title="Size">
+      <FilterBlock title="Size (India)">
         {sizes.map((s) => (
           <Chip key={s} on={size === s} onClick={() => set('size', s)}>
-            {s}
+            {shortSize(s)}
           </Chip>
         ))}
       </FilterBlock>

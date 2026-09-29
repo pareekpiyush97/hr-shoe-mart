@@ -22,7 +22,7 @@ export interface Brand {
 
 /**
  * Firestore has no joins, so the category and brand names live on the product,
- * and sizes are a `{ "UK 8": 20 }` map — one read renders a whole product page,
+ * and sizes are a `{ "IND 8": 20 }` map — one read renders a whole product page,
  * and stock can be decremented inside a single-document transaction.
  */
 export interface Product {
@@ -57,6 +57,9 @@ export const sizesOf = (p: Product) =>
   )
 
 export const inStock = (p: Product) => Object.values(p.variants ?? {}).some((n) => n > 0)
+
+/** "IND 8" → "8" for size chips, where the heading already says India. */
+export const shortSize = (size: string) => size.replace(/^(IND|UK)\s*/i, '')
 
 export interface CartLine {
   slug: string

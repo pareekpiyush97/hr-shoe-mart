@@ -10,7 +10,7 @@ import {
   Truck,
 } from 'lucide-react'
 import { addReview, getProduct, listRelated, listReviews } from '../lib/db'
-import { sizesOf, type Product, type Review } from '../lib/types'
+import { shortSize, sizesOf, type Product, type Review } from '../lib/types'
 import { useCart, useWishlist } from '../lib/store'
 import { useSettings, waLink } from '../lib/settings'
 import { cx, day, inr, off } from '../lib/format'
@@ -212,7 +212,7 @@ export default function ProductPage() {
           {/* sizes */}
           <div className="mt-7">
             <div className="mb-2 flex items-center justify-between">
-              <p className="label mb-0">Select size (UK)</p>
+              <p className="label mb-0">Select size (India)</p>
               {picked && picked.stock > 0 && picked.stock <= 5 && (
                 <span className="text-xs font-semibold text-clay">
                   Sirf {picked.stock} bache hain
@@ -238,10 +238,14 @@ export default function ProductPage() {
                         : 'border-ink/15 bg-white hover:border-ink',
                   )}
                 >
-                  {sz}
+                  {shortSize(sz)}
                 </button>
               ))}
             </div>
+            <p className="mt-2.5 text-[11px] text-inksoft">
+              India size UK ke barabar hoti hai — jo size aap Bata ya Campus me lete hain, wahi
+              yahan chunein.
+            </p>
           </div>
 
           {/* qty + actions */}
@@ -355,7 +359,10 @@ export default function ProductPage() {
               ['Colour', p.color],
               ['Material', p.material],
               ['Wear for', p.gender],
-              ['Sizes available', variants.filter(([, n]) => n > 0).map(([sz]) => sz).join(', ') || '—'],
+              [
+                'Sizes available',
+                variants.filter(([, n]) => n > 0).map(([sz]) => shortSize(sz)).join(', ') || '—',
+              ],
             ].map(([k, v]) => (
               <div key={k as string} className="flex justify-between gap-6 py-3">
                 <dt className="text-inksoft">{k as string}</dt>

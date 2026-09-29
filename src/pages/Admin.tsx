@@ -568,7 +568,7 @@ function NewProduct({
       </div>
       <div>
         <label className="label">Sizes (comma separated) *</label>
-        <input name="sizes" required defaultValue="UK 6, UK 7, UK 8, UK 9, UK 10" className="field" />
+        <input name="sizes" required defaultValue="IND 6, IND 7, IND 8, IND 9, IND 10" className="field" />
       </div>
 
       <button disabled={busy} className="btn-clay">
