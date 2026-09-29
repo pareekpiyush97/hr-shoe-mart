@@ -13,7 +13,7 @@ export default function Footer() {
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-clay font-display text-lg font-bold text-bone">
               HR
             </span>
-            <span className="font-display text-xl font-bold text-bone">{store.name}</span>
+            <span className="font-display text-2xl text-bone">{store.name}</span>
           </div>
           <p className="text-sm leading-relaxed">{store.tagline}</p>
           <p className="mt-4 text-sm leading-relaxed">
@@ -23,7 +23,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-sm font-semibold tracking-[0.18em] text-bone uppercase">Shop</h3>
+          <h3 className="mb-4 text-[11px] font-semibold tracking-[0.24em] text-brass uppercase">Shop</h3>
           <ul className="space-y-2.5 text-sm">
             {[
               ['/shop?gender=men', 'Men'],
@@ -43,7 +43,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-sm font-semibold tracking-[0.18em] text-bone uppercase">Help</h3>
+          <h3 className="mb-4 text-[11px] font-semibold tracking-[0.24em] text-brass uppercase">Help</h3>
           <ul className="space-y-2.5 text-sm">
             {[
               ['/track', 'Track your order'],
@@ -65,7 +65,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-sm font-semibold tracking-[0.18em] text-bone uppercase">Visit</h3>
+          <h3 className="mb-4 text-[11px] font-semibold tracking-[0.24em] text-brass uppercase">Visit</h3>
           <ul className="space-y-3 text-sm">
             <li className="flex gap-2.5">
               <MapPin size={16} className="mt-0.5 shrink-0 text-brass" />

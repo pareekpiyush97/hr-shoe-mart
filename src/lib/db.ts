@@ -19,7 +19,7 @@ import {
   type DocumentData,
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
-import { call, db } from './firebase'
+import { call, db, firebaseReady } from './firebase'
 import type {
   Brand,
   Category,
@@ -32,6 +32,27 @@ import type {
 
 const shape = <T>(d: QueryDocumentSnapshot<DocumentData>) => ({ id: d.id, ...d.data() }) as T
 
+/**
+ * Catalogue fallback.
+ *
+ * Until the Firebase project is wired up (VITE_FIREBASE_* in .env) the shop
+ * would have nothing to show. Rather than an empty page, the same seed file
+ * the importer uses is loaded as a separate chunk, so the storefront browses
+ * normally. It only affects reading the catalogue — ordering still needs the
+ * real backend. The moment the config exists this code path is never taken.
+ */
+interface Seed {
+  categories: Category[]
+  brands: Brand[]
+  products: Product[]
+  settings: Record<string, unknown>
+}
+let seedPromise: Promise<Seed> | null = null
+const seed = () => {
+  seedPromise ??= import('../../firebase/seed/catalogue.json').then((m) => m.default as unknown as Seed)
+  return seedPromise
+}
+
 const millis = (v: unknown): number | null => {
   const t = v as { toMillis?: () => number } | null
   return t?.toMillis ? t.toMillis() : null
@@ -39,11 +60,13 @@ const millis = (v: unknown): number | null => {
 
 // ------------------------------------------------------------------ catalogue
 export async function listCategories(): Promise<Category[]> {
+  if (!firebaseReady) return (await seed()).categories
   const snap = await getDocs(query(collection(db, 'categories'), orderBy('sortOrder')))
   return snap.docs.map((d) => shape<Category>(d))
 }
 
 export async function listBrands(): Promise<Brand[]> {
+  if (!firebaseReady) return (await seed()).brands
   const snap = await getDocs(query(collection(db, 'brands'), orderBy('name')))
   return snap.docs.map((d) => shape<Brand>(d))
 }
@@ -54,6 +77,7 @@ export async function listBrands(): Promise<Brand[]> {
  * costs one query instead of one per filter change.
  */
 export async function listProducts(): Promise<Product[]> {
+  if (!firebaseReady) return (await seed()).products
   const snap = await getDocs(
     query(collection(db, 'products'), where('isActive', '==', true), orderBy('sortOrder')),
   )
@@ -61,6 +85,7 @@ export async function listProducts(): Promise<Product[]> {
 }
 
 export async function listFeatured(n = 8): Promise<Product[]> {
+  if (!firebaseReady) return (await seed()).products.filter((p) => p.isFeatured).slice(0, n)
   const snap = await getDocs(
     query(
       collection(db, 'products'),
@@ -73,6 +98,8 @@ export async function listFeatured(n = 8): Promise<Product[]> {
 }
 
 export async function listNewest(n = 8): Promise<Product[]> {
+  if (!firebaseReady)
+    return [...(await seed()).products].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, n)
   const snap = await getDocs(
     query(
       collection(db, 'products'),
@@ -85,6 +112,7 @@ export async function listNewest(n = 8): Promise<Product[]> {
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
+  if (!firebaseReady) return (await seed()).products.find((p) => p.slug === slug) ?? null
   const snap = await getDoc(doc(db, 'products', slug))
   if (!snap.exists() || snap.data().isActive === false) return null
   return { id: snap.id, ...snap.data() } as Product
@@ -92,6 +120,10 @@ export async function getProduct(slug: string): Promise<Product | null> {
 
 export async function listRelated(categorySlug: string | null, exceptSlug: string, n = 4) {
   if (!categorySlug) return []
+  if (!firebaseReady)
+    return (await seed()).products
+      .filter((p) => p.categorySlug === categorySlug && p.slug !== exceptSlug)
+      .slice(0, n)
   const snap = await getDocs(
     query(
       collection(db, 'products'),
@@ -108,6 +140,7 @@ export async function listRelated(categorySlug: string | null, exceptSlug: strin
 
 export async function listBySlugs(slugs: string[]): Promise<Product[]> {
   if (slugs.length === 0) return []
+  if (!firebaseReady) return (await seed()).products.filter((p) => slugs.includes(p.slug))
   // `in` takes up to 30 values per query, so chunk for bigger wishlists.
   const chunks: string[][] = []
   for (let i = 0; i < slugs.length; i += 30) chunks.push(slugs.slice(i, i + 30))
@@ -123,12 +156,14 @@ export async function listBySlugs(slugs: string[]): Promise<Product[]> {
 
 // ------------------------------------------------------------------ settings
 export async function loadSettings() {
+  if (!firebaseReady) return (await seed()).settings
   const snap = await getDocs(collection(db, 'settings'))
   return Object.fromEntries(snap.docs.map((d) => [d.id, d.data()])) as Record<string, unknown>
 }
 
 // ------------------------------------------------------------------- reviews
 export async function listReviews(productSlug: string, n = 10): Promise<Review[]> {
+  if (!firebaseReady) return []
   const snap = await getDocs(
     query(
       collection(db, 'reviews'),

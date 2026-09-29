@@ -1,19 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --font-display: 'Fraunces', Georgia, serif;
+  /* High-contrast serif for display, quiet grotesk for everything else. */
+  --font-display: 'Playfair Display', Georgia, serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Leather-and-bone palette: warm neutrals, clay accent, brass highlight. */
-  --color-bone: #fbf8f3;
-  --color-sand: #f0e8db;
-  --color-sanddeep: #e2d6c3;
-  --color-ink: #16120f;
-  --color-inksoft: #4a423b;
-  --color-clay: #b14724;
-  --color-claydeep: #8e3618;
-  --color-brass: #c39b4e;
+  /* Ivory, deep crimson and gold — the palette of an Indian festive store.
+     Token names are unchanged from the older leather theme on purpose, so the
+     whole site re-skins from these six lines. */
+  --color-bone: #f7f3ec;
+  --color-sand: #efe8dc;
+  --color-sanddeep: #ded2bf;
+  --color-ink: #171310;
+  --color-inksoft: #5a5049;
+  --color-clay: #8e1b2b;
+  --color-claydeep: #6b1220;
+  --color-brass: #b8912f;
   --color-moss: #2f6b4f;
 }
 
@@ -81,6 +84,32 @@
   .shell {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
+
+  /* A thin outlined button with wide-tracked caps — the quiet CTA used
+     against photography and on ivory. */
+  .btn-outline {
+    @apply btn border border-ink/25 bg-transparent px-7 text-[11px] font-semibold tracking-[0.18em] text-ink uppercase hover:border-ink hover:bg-ink hover:text-bone;
+  }
+
+  .btn-outline-light {
+    @apply btn border border-bone/45 bg-transparent px-7 text-[11px] font-semibold tracking-[0.18em] text-bone uppercase hover:border-bone hover:bg-bone hover:text-ink;
+  }
+
+  /* Arch-topped frame: the lookbook device from the reference. */
+  .arch {
+    border-radius: 9999px 9999px 14px 14px;
+    overflow: hidden;
+  }
+
+  /* Stacked caps running down the left edge of a section. */
+  .vlabel {
+    writing-mode: vertical-rl;
+    @apply text-[10px] font-semibold tracking-[0.3em] text-inksoft uppercase;
+  }
+
+  .gold {
+    @apply text-brass;
+  }
 }
 
 @keyframes hrsm-marquee {
@@ -94,6 +123,11 @@
 
 .marquee-track {
   animation: hrsm-marquee 34s linear infinite;
+}
+
+/* The crimson trust ticker that sits under the masthead. */
+.ticker-track {
+  animation: hrsm-marquee 38s linear infinite;
 }
 
 @keyframes hrsm-rise {
@@ -113,6 +147,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .marquee-track,
+  .ticker-track,
   .rise {
     animation: none;
   }

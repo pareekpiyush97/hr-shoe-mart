@@ -39,14 +39,30 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-ink text-bone">
-        <div className="shell flex h-9 items-center justify-between text-[11px] tracking-wide">
-          <p className="truncate">
-            Free delivery above ₹{delivery.free_above} · {delivery.eta_city} · COD available
-          </p>
-          <a href={`tel:${store.phone}`} className="hidden items-center gap-1.5 hover:text-brass sm:flex">
-            <Phone size={12} /> {store.phone}
-          </a>
+      {/* Crimson trust ticker — the shop's promises, always moving. */}
+      <div className="overflow-hidden bg-clay text-bone">
+        <div className="ticker-track flex w-max items-center gap-0 py-2 whitespace-nowrap">
+          {[0, 1].map((pass) => (
+            <span key={pass} className="flex items-center">
+              {[
+                '100% original, bill ke saath',
+                `Free delivery above ₹${delivery.free_above}`,
+                delivery.eta_city,
+                '7-day easy exchange',
+                'Cash on Delivery available',
+                'Bikaneri jutti, haath se bani',
+                `Call ${store.phone}`,
+              ].map((t) => (
+                <span
+                  key={t}
+                  className="flex items-center text-[10.5px] font-medium tracking-[0.16em] uppercase"
+                >
+                  {t}
+                  <span className="mx-6 text-brass">◆</span>
+                </span>
+              ))}
+            </span>
+          ))}
         </div>
       </div>
 

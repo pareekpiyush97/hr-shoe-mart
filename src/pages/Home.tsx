@@ -62,65 +62,66 @@ export default function Home() {
   return (
     <>
       {/* ---------------- HERO ---------------- */}
-      <section className="relative overflow-hidden bg-sand">
-        <div className="shell grid items-center gap-10 py-14 lg:grid-cols-[1.05fr_1fr] lg:py-20">
-          <div className="rise">
-            <p className="eyebrow">Since 1998 · Station Road, Bikaner</p>
-            <h1 className="mt-4 text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
+      {/* Full-bleed photograph, everything else gets out of its way. */}
+      <section className="relative isolate min-h-[78vh] overflow-hidden">
+        <img
+          src="https://images.pexels.com/photos/33812005/pexels-photo-33812005.jpeg?auto=compress&cs=tinysrgb&w=1800"
+          alt="Leather shoes on the display shelves"
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/65 to-ink/25" />
+
+        <div className="shell flex min-h-[78vh] flex-col justify-center py-20">
+          <div className="rise max-w-2xl">
+            <p className="text-[11px] font-semibold tracking-[0.3em] text-brass uppercase">
+              Since 1998 · Station Road, Bikaner
+            </p>
+            <h1 className="mt-6 text-5xl leading-[1.02] text-bone sm:text-6xl lg:text-7xl">
               Bikaner ka apna
-              <span className="block text-clay">footwear ghar</span>
+              <span className="mt-1 block italic">footwear ghar</span>
             </h1>
-            <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-inksoft">
+            <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-bone/75">
               Sports shoes se lekar haath se bani Bikaneri jutti tak — 15+ bharosemand brands, asli
-              maal, aur {delivery.eta_city}. Ab poora stock online, ghar baithe.
+              maal, aur {delivery.eta_city}.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/shop" className="btn-primary">
-                Shop the collection <ArrowRight size={16} />
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link to="/shop" className="btn-clay px-8">
+                Shop the collection <ArrowRight size={15} />
               </Link>
-              <Link to="/shop?category=slippers-chappal" className="btn-ghost">
-                Bikaneri jutti dekhein
+              <Link to="/shop?category=slippers-chappal" className="btn-outline-light">
+                Bikaneri jutti
               </Link>
             </div>
-
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-6">
-              {[
-                ['15+', 'Brands'],
-                ['50+', 'Styles in stock'],
-                ['27 yrs', 'Bharosa'],
-              ].map(([v, k]) => (
-                <div key={k}>
-                  <dt className="font-display text-2xl font-bold">{v}</dt>
-                  <dd className="text-xs tracking-wide text-inksoft uppercase">{k}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
+        </div>
 
-          <div className="relative grid grid-cols-2 gap-4">
-            <img
-              src="https://images.pexels.com/photos/1027130/pexels-photo-1027130.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Red sneakers"
-              className="aspect-3/4 w-full rounded-3xl object-cover"
-            />
-            <div className="grid gap-4">
-              <img
-                src="https://images.pexels.com/photos/12210271/pexels-photo-12210271.jpeg?auto=compress&cs=tinysrgb&w=800"
-                alt="Tan leather oxfords"
-                className="aspect-4/5 w-full rounded-3xl object-cover"
-              />
-              <div className="rounded-3xl bg-ink p-5 text-bone">
-                <BadgeIndianRupee size={22} className="text-brass" />
-                <p className="mt-3 font-display text-lg leading-snug">
-                  Festive offer — flat 10% off
-                </p>
-                <p className="mt-1 text-xs text-bone/70">
-                  Code <strong className="text-brass">HRSM10</strong> · ₹999 se upar
-                </p>
+        <div className="absolute inset-x-0 bottom-0 border-t border-bone/15 bg-ink/45 backdrop-blur-sm">
+          <dl className="shell grid grid-cols-3 gap-6 py-5">
+            {[
+              ['15+', 'Brands'],
+              ['50+', 'Styles in stock'],
+              ['27', 'Saal ka bharosa'],
+            ].map(([v, k]) => (
+              <div key={k}>
+                <dt className="font-display text-2xl font-semibold text-brass">{v}</dt>
+                <dd className="text-[10px] tracking-[0.2em] text-bone/60 uppercase">{k}</dd>
               </div>
-            </div>
-          </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* ---------------- FESTIVE STRIP ---------------- */}
+      <section className="bg-ink">
+        <div className="shell flex flex-wrap items-center justify-between gap-4 py-6">
+          <p className="flex items-center gap-3 font-display text-xl text-bone">
+            <BadgeIndianRupee size={20} className="text-brass" />
+            Festive offer — flat 10% off
+          </p>
+          <p className="text-xs tracking-[0.18em] text-bone/60 uppercase">
+            Code <span className="font-semibold text-brass">HRSM10</span> · ₹999 se upar
+          </p>
         </div>
       </section>
 
@@ -148,40 +149,38 @@ export default function Home() {
       </section>
 
       {/* ---------------- CATEGORIES ---------------- */}
-      <section className="shell py-16">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="eyebrow">Categories</p>
-            <h2 className="mt-2 text-3xl sm:text-4xl">Aap kya dhoondh rahe hain?</h2>
-          </div>
-          <Link to="/shop" className="hidden text-sm font-semibold text-clay hover:underline sm:block">
-            View all →
-          </Link>
+      <section className="shell relative py-20 xl:px-16">
+        <span className="vlabel absolute top-28 left-1 hidden xl:block">The Collection</span>
+
+        <div className="mb-12 text-center">
+          <p className="eyebrow">Categories</p>
+          <h2 className="mx-auto mt-3 max-w-xl text-4xl leading-tight sm:text-5xl">
+            Aap kya <span className="italic gold">dhoondh</span> rahe hain?
+          </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {/* Arch-topped frames — the lookbook device from the reference. */}
+        <div className="grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">
           {(loading ? Array.from({ length: 8 }) : cats).map((c, i) => {
             const cat = c as Category | undefined
-            if (!cat) return <div key={i} className="aspect-square animate-pulse rounded-2xl bg-sand" />
+            if (!cat)
+              return <div key={i} className="arch aspect-4/5 animate-pulse bg-sand" />
             return (
-              <Link
-                key={cat.id}
-                to={`/shop?category=${cat.slug}`}
-                className="group relative aspect-square overflow-hidden rounded-2xl bg-sand"
-              >
-                <img
-                  src={cat.imageUrl ?? ''}
-                  alt={cat.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4">
-                  <p className="font-display text-base font-semibold text-bone">{cat.name}</p>
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px] text-bone/70">
-                    Shop now <ArrowRight size={11} />
-                  </p>
+              <Link key={cat.id} to={`/shop?category=${cat.slug}`} className="group text-center">
+                <div className="arch aspect-4/5 bg-sand">
+                  <img
+                    src={cat.imageUrl ?? ''}
+                    alt={cat.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                 </div>
+                <p className="mt-4 font-display text-[17px] transition group-hover:text-clay">
+                  {cat.name}
+                </p>
+                <p className="mt-1 inline-flex items-center gap-1 text-[10px] tracking-[0.18em] text-inksoft uppercase">
+                  Shop now <ArrowRight size={10} />
+                </p>
               </Link>
             )
           })}
@@ -190,13 +189,15 @@ export default function Home() {
 
       {/* ---------------- FEATURED ---------------- */}
       <section className="shell pb-16">
-        <div className="mb-8 flex items-end justify-between gap-4">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-ink/10 pb-6">
           <div>
             <p className="eyebrow">Handpicked</p>
-            <h2 className="mt-2 text-3xl sm:text-4xl">Is hafte ke favourites</h2>
+            <h2 className="mt-3 text-4xl leading-tight sm:text-5xl">
+              Is hafte ke <span className="italic gold">favourites</span>
+            </h2>
           </div>
-          <Link to="/shop" className="hidden text-sm font-semibold text-clay hover:underline sm:block">
-            All products →
+          <Link to="/shop" className="btn-outline">
+            All products
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
@@ -226,10 +227,10 @@ export default function Home() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/85 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6">
-              <h3 className="text-2xl text-bone">{title}</h3>
-              <p className="mt-1 text-sm text-bone/75">{note}</p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brass">
-                Explore <ArrowRight size={13} />
+              <h3 className="text-3xl text-bone">{title}</h3>
+              <p className="mt-1.5 text-sm text-bone/70">{note}</p>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.2em] text-brass uppercase">
+                Explore <ArrowRight size={11} />
               </span>
             </div>
           </Link>
@@ -252,9 +253,14 @@ export default function Home() {
 
       {/* ---------------- NEW ARRIVALS ---------------- */}
       <section className="shell py-16">
-        <div className="mb-8">
-          <p className="eyebrow">Fresh stock</p>
-          <h2 className="mt-2 text-3xl sm:text-4xl">Naya aaya hai</h2>
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-ink/10 pb-6">
+          <div>
+            <p className="eyebrow">Fresh stock</p>
+            <h2 className="mt-3 text-4xl leading-tight sm:text-5xl">
+              Naya <span className="italic gold">aaya</span> hai
+            </h2>
+          </div>
+          <span className="font-display text-5xl leading-none text-sanddeep">2026</span>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
           {loading
@@ -267,7 +273,9 @@ export default function Home() {
       <section className="bg-ink py-16 text-bone">
         <div className="shell">
           <p className="eyebrow">Customers</p>
-          <h2 className="mt-2 mb-9 text-3xl text-bone sm:text-4xl">Bikaner bolta hai</h2>
+          <h2 className="mt-3 mb-10 text-4xl text-bone sm:text-5xl">
+            Bikaner <span className="italic text-brass">bolta</span> hai
+          </h2>
           <div className="grid gap-5 md:grid-cols-3">
             {REVIEWS.map((r) => (
               <figure key={r.name} className="rounded-2xl bg-bone/6 p-6">
@@ -290,7 +298,9 @@ export default function Home() {
         <div className="grid items-center gap-8 rounded-3xl bg-sand p-8 lg:grid-cols-2 lg:p-12">
           <div>
             <p className="eyebrow">Visit us</p>
-            <h2 className="mt-2 text-3xl sm:text-4xl">Dukaan par aaiye, pair try kijiye</h2>
+            <h2 className="mt-3 text-4xl leading-tight sm:text-5xl">
+              Dukaan par aaiye, <span className="italic gold">pair try</span> kijiye
+            </h2>
             <p className="mt-4 text-sm leading-relaxed text-inksoft">
               Online order karke store pickup bhi kar sakte hain. Humare counter par har size try
               karne ki suvidha hai — aur jo online dikh raha hai, wahi stock shop mein bhi hai.
@@ -314,8 +324,8 @@ export default function Home() {
             </a>
           </div>
           <img
-            src="https://images.pexels.com/photos/27196457/pexels-photo-27196457.jpeg?auto=compress&cs=tinysrgb&w=1000"
-            alt="Shoe store shelves"
+            src="https://images.pexels.com/photos/36311066/pexels-photo-36311066.jpeg?auto=compress&cs=tinysrgb&w=1200"
+            alt="HR Shoe Mart storefront display"
             loading="lazy"
             className="aspect-4/3 w-full rounded-2xl object-cover"
           />

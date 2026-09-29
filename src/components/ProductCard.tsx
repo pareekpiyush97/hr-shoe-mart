@@ -14,7 +14,7 @@ export default function ProductCard({ p }: { p: Product }) {
   return (
     <article className="group relative">
       <Link to={`/product/${p.slug}`} className="block">
-        <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-sand">
+        <div className="relative aspect-4/5 overflow-hidden rounded-t-[999px] rounded-b-xl bg-sand">
           <img
             src={p.images[0]}
             alt={p.title}
@@ -22,7 +22,7 @@ export default function ProductCard({ p }: { p: Product }) {
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
           {discount > 0 && (
-            <span className="absolute top-3 left-3 rounded-full bg-clay px-2.5 py-1 text-[11px] font-bold text-bone">
+            <span className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-clay px-3 py-1 text-[10px] font-semibold tracking-[0.12em] text-bone uppercase">
               {discount}% OFF
             </span>
           )}
@@ -47,7 +47,7 @@ export default function ProductCard({ p }: { p: Product }) {
           {p.brandName ?? 'HR Shoe Mart'}
         </p>
         <Link to={`/product/${p.slug}`}>
-          <h3 className="mt-1 line-clamp-1 font-display text-[15px] font-semibold hover:text-clay">
+          <h3 className="mt-1 line-clamp-1 font-display text-[16px] hover:text-clay">
             {p.title}
           </h3>
         </Link>
