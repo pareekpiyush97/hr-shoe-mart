@@ -2,6 +2,13 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CartLine } from './types'
 
+/**
+ * A shop, not a wholesaler. placeOrder refuses anything above this rather than
+ * quietly trimming the cart, so the two numbers must stay equal — the matching
+ * MAX_QTY_PER_LINE lives in functions/index.js.
+ */
+export const MAX_QTY_PER_LINE = 5
+
 interface CartState {
   lines: CartLine[]
   add: (line: CartLine) => void
@@ -19,14 +26,14 @@ export const useCart = create<CartState>()(
           const i = s.lines.findIndex((l) => l.slug === line.slug && l.size === line.size)
           if (i === -1) return { lines: [...s.lines, line] }
           const lines = [...s.lines]
-          lines[i] = { ...lines[i], qty: Math.min(lines[i].qty + line.qty, lines[i].maxStock, 5) }
+          lines[i] = { ...lines[i], qty: Math.min(lines[i].qty + line.qty, lines[i].maxStock, MAX_QTY_PER_LINE) }
           return { lines }
         }),
       setQty: (slug, size, qty) =>
         set((s) => ({
           lines: s.lines.map((l) =>
             l.slug === slug && l.size === size
-              ? { ...l, qty: Math.max(1, Math.min(qty, l.maxStock, 5)) }
+              ? { ...l, qty: Math.max(1, Math.min(qty, l.maxStock, MAX_QTY_PER_LINE)) }
               : l,
           ),
         })),

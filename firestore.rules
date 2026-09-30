@@ -29,7 +29,9 @@ service cloud.firestore {
     // read never happens, because `||` short-circuits.
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.admin == true
+        // .get() rather than .admin: a token without the claim is the normal
+        // case, and reading a field that is not there is an evaluation error.
+        request.auth.token.get('admin', false) == true
         || (
           exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
           && get(/databases/$(database)/documents/profiles/$(request.auth.uid))
@@ -93,8 +95,12 @@ service cloud.firestore {
       allow create: if isOwner(uid) && request.resource.data.role == 'customer';
 
       // Afterwards a customer may fix their own name and phone, nothing else.
+      // Both roles are read with a default: reading a field that is not there
+      // is an evaluation error, which denies the write, so a profile written
+      // without a role — by hand from the console, say — would lock its owner
+      // out of editing their own name.
       allow update: if isOwner(uid)
-                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.get('role', '') == resource.data.get('role', '')
                     && request.resource.data.diff(resource.data)
                          .affectedKeys().hasOnly(['fullName', 'phone', 'updatedAt']);
       allow delete: if false;

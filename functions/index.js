@@ -115,7 +115,12 @@ exports.placeOrder = onCall(async (req) => {
 
     snaps.forEach((snap, i) => {
       const it = items[i]
-      const qty = Math.max(1, Math.min(MAX_QTY_PER_LINE, Math.floor(Number(it.qty) || 1)))
+      // Clamping silently would charge for a different cart than the one the
+      // customer is looking at, so an impossible quantity is refused instead.
+      const qty = Math.floor(Number(it.qty))
+      if (!Number.isFinite(qty) || qty < 1) throw new HttpsError('invalid-argument', 'QTY_INVALID')
+      if (qty > MAX_QTY_PER_LINE)
+        throw new HttpsError('invalid-argument', `QTY_TOO_LARGE: ${MAX_QTY_PER_LINE} per size`)
       const size = clean(it.size, 20)
 
       if (!snap.exists) throw new HttpsError('failed-precondition', `PRODUCT_NOT_FOUND: ${it.slug}`)

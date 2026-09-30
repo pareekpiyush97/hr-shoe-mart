@@ -9,8 +9,9 @@
     "lint": "oxlint",
     "deploy": "npm run build && node scripts/publish-pages.mjs",
     "preview": "vite preview",
-    "emu": "firebase emulators:start --only auth,firestore,functions --project demo-hr-shoe-mart",
+    "emu": "node firebase/emulators.mjs",
     "emu:seed": "node firebase/seed-emulator.mjs",
+    "emu:test": "node firebase/smoke-test.mjs",
     "dev:emu": "vite --mode emulator"
   },
   "dependencies": {
