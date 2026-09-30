@@ -26,6 +26,15 @@ const useEmulator = import.meta.env.VITE_USE_EMULATOR === 'true'
 
 export const firebaseReady = useEmulator || Boolean(config.apiKey && config.projectId)
 
+/**
+ * Firestore and Auth run on the free Spark plan, but Cloud Functions need
+ * Blaze. Until they are deployed there is no server to price an order, so
+ * checkout composes a WhatsApp message instead. Flip VITE_FUNCTIONS_READY to
+ * true after `firebase deploy --only functions`.
+ */
+export const functionsReady =
+  useEmulator || (firebaseReady && import.meta.env.VITE_FUNCTIONS_READY === 'true')
+
 if (!firebaseReady && import.meta.env.DEV) {
   console.warn('[HR Shoe Mart] Firebase config missing — copy .env.example to .env and fill it in.')
 }

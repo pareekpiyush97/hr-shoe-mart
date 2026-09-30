@@ -5,7 +5,7 @@ import { placeOrder as submitOrder, previewCoupon, razorpayConfig, razorpayCreat
 import { cartSubtotal, useCart } from '../lib/store'
 import { useSettings, waLink } from '../lib/settings'
 import { useAuth } from '../lib/auth'
-import { firebaseReady } from '../lib/firebase'
+import { firebaseReady, functionsReady } from '../lib/firebase'
 import { cx, inr } from '../lib/format'
 import type { PayMethod, PlacedOrder } from '../lib/types'
 import { Alert, Empty, Spinner } from '../components/ui'
@@ -124,7 +124,7 @@ export default function Checkout() {
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault()
-    if (!firebaseReady) return orderOnWhatsApp(e)
+    if (!functionsReady) return orderOnWhatsApp(e)
     setErr('')
     setBusy(true)
     try {
@@ -238,8 +238,8 @@ export default function Checkout() {
     <div className="shell py-10">
       <h1 className="text-3xl sm:text-4xl">Checkout</h1>
       <p className="mt-1.5 text-sm text-inksoft">
-        {user
-          ? `${user.email} se logged in — order aapke account me save ho jayega.`
+        {functionsReady
+          ? `${user?.email} se logged in — order aapke account me save ho jayega.`
           : 'Order WhatsApp par bhejein — hum turant confirm kar denge.'}
       </p>
 
@@ -315,7 +315,7 @@ export default function Checkout() {
           <section className="card p-6">
             <h2 className="mb-4 text-xl">Payment method</h2>
 
-            {!firebaseReady && (
+            {!functionsReady && (
               <div className="mb-4 flex items-start gap-3 rounded-xl bg-moss/10 p-4 text-sm text-moss">
                 <MessageCircle size={18} className="mt-0.5 shrink-0" />
                 <span>
@@ -326,7 +326,7 @@ export default function Checkout() {
               </div>
             )}
 
-            <div className={cx('space-y-3', !firebaseReady && 'pointer-events-none opacity-40')}>
+            <div className={cx('space-y-3', !functionsReady && 'pointer-events-none opacity-40')}>
               {methods.map((m) => (
                 <label
                   key={m.id}
@@ -392,22 +392,28 @@ export default function Checkout() {
               ))}
             </ul>
 
-            <form onSubmit={applyCoupon} className="mt-4 flex gap-2">
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Coupon code"
-                className="field"
-              />
-              <button type="button" onClick={applyCoupon} className="btn-ghost shrink-0 px-5">
-                Apply
-              </button>
-            </form>
-            {couponMsg && <p className="mt-2 text-xs text-clay">{couponMsg}</p>}
-            {applied && (
-              <p className="mt-2 text-xs font-semibold text-moss">
-                {applied.code} applied — {inr(applied.discount)} off
-              </p>
+            {/* Coupons are validated server side, so the field only appears
+                once the Cloud Functions are live. */}
+            {functionsReady && (
+              <>
+                <form onSubmit={applyCoupon} className="mt-4 flex gap-2">
+                  <input
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="Coupon code"
+                    className="field"
+                  />
+                  <button type="button" onClick={applyCoupon} className="btn-ghost shrink-0 px-5">
+                    Apply
+                  </button>
+                </form>
+                {couponMsg && <p className="mt-2 text-xs text-clay">{couponMsg}</p>}
+                {applied && (
+                  <p className="mt-2 text-xs font-semibold text-moss">
+                    {applied.code} applied — {inr(applied.discount)} off
+                  </p>
+                )}
+              </>
             )}
 
             <dl className="mt-4 space-y-2.5 text-sm">
@@ -441,13 +447,13 @@ export default function Checkout() {
 
             <button
               disabled={busy}
-              className={cx('mt-5 w-full', firebaseReady ? 'btn-clay' : 'btn bg-moss text-bone hover:brightness-110')}
+              className={cx('mt-5 w-full', functionsReady ? 'btn-clay' : 'btn bg-moss text-bone hover:brightness-110')}
             >
               {busy ? (
                 <>
                   <Loader2 size={16} className="animate-spin" /> Processing…
                 </>
-              ) : !firebaseReady ? (
+              ) : !functionsReady ? (
                 <>
                   <MessageCircle size={16} /> WhatsApp par order bhejein · {inr(total)}
                 </>
@@ -460,7 +466,7 @@ export default function Checkout() {
               )}
             </button>
             <p className="mt-3 text-center text-[11px] text-inksoft">
-              {firebaseReady
+              {functionsReady
                 ? 'Order place karte hi stock reserve ho jaata hai. Prices aur stock server par verify hote hain.'
                 : 'Aapka poora order WhatsApp me likha hua chala jayega — kuch dobara type nahi karna padega.'}
             </p>

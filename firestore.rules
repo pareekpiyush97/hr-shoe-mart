@@ -15,10 +15,27 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Set as a custom claim by the onUserCreate function, from the
-    // adminEmails allowlist. Cheaper than reading a profile doc on every rule.
+    // Two ways to be staff, because the site starts on the Spark plan:
+    //
+    //  - the `admin` custom claim, set by onUserCreate from the adminEmails
+    //    allowlist. Free, no document read, but it needs Cloud Functions,
+    //    which need Blaze.
+    //  - role:'admin' on the profile document. Costs one read per rule
+    //    evaluation, and can only be put there from the console or the Admin
+    //    SDK — the client rules below pin role to 'customer' on create and
+    //    forbid changing it on update, so nobody can promote themselves.
+    //
+    // Once functions are deployed the claim path takes over and the profile
+    // read never happens, because `||` short-circuits.
     function isAdmin() {
-      return isSignedIn() && request.auth.token.admin == true;
+      return isSignedIn() && (
+        request.auth.token.admin == true
+        || (
+          exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+          && get(/databases/$(database)/documents/profiles/$(request.auth.uid))
+               .data.role == 'admin'
+        )
+      );
     }
 
     function isOwner(uid) {

@@ -4,7 +4,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react'
 import { cartSubtotal, useCart } from '../lib/store'
 import { useSettings } from '../lib/settings'
 import { useAuth } from '../lib/auth'
-import { firebaseReady } from '../lib/firebase'
+import { firebaseReady, functionsReady } from '../lib/firebase'
 import { previewCoupon } from '../lib/db'
 import { inr } from '../lib/format'
 import { Alert, Empty } from '../components/ui'
@@ -118,24 +118,28 @@ export default function Cart() {
           <div className="card p-6">
             <h2 className="text-xl">Order summary</h2>
 
-            <form onSubmit={applyCoupon} className="mt-5 flex gap-2">
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Coupon code"
-                className="field"
-              />
-              <button className="btn-ghost shrink-0 px-5">Apply</button>
-            </form>
-            {msg && <p className="mt-2 text-xs text-clay">{msg}</p>}
-            {applied && (
-              <p className="mt-2 text-xs font-semibold text-moss">
-                {applied.code} applied — {inr(applied.discount)} off
-              </p>
+            {functionsReady && (
+              <>
+                <form onSubmit={applyCoupon} className="mt-5 flex gap-2">
+                  <input
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="Coupon code"
+                    className="field"
+                  />
+                  <button className="btn-ghost shrink-0 px-5">Apply</button>
+                </form>
+                {msg && <p className="mt-2 text-xs text-clay">{msg}</p>}
+                {applied && (
+                  <p className="mt-2 text-xs font-semibold text-moss">
+                    {applied.code} applied — {inr(applied.discount)} off
+                  </p>
+                )}
+                <p className="mt-2 text-[11px] text-inksoft">
+                  Try <strong>HRSM10</strong> — 10% off above ₹{delivery.free_above}.
+                </p>
+              </>
             )}
-            <p className="mt-2 text-[11px] text-inksoft">
-              Try <strong>HRSM10</strong> (10% off above ₹999) or <strong>BIKANER200</strong>.
-            </p>
 
             <dl className="mt-5 space-y-2.5 border-t border-ink/8 pt-5 text-sm">
               <Row k="Subtotal" v={inr(subtotal)} />

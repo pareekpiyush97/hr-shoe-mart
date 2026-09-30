@@ -35,11 +35,13 @@ const shape = <T>(d: QueryDocumentSnapshot<DocumentData>) => ({ id: d.id, ...d.d
 /**
  * Catalogue fallback.
  *
- * Until the Firebase project is wired up (VITE_FIREBASE_* in .env) the shop
- * would have nothing to show. Rather than an empty page, the same seed file
- * the importer uses is loaded as a separate chunk, so the storefront browses
- * normally. It only affects reading the catalogue — ordering still needs the
- * real backend. The moment the config exists this code path is never taken.
+ * The shop can survive a missing order button; it cannot survive an empty
+ * shelf. So every catalogue read goes through `catalogue()` below, which
+ * falls back to the same seed file the importer uses — loaded as a separate
+ * chunk, so it costs nothing until it is needed. It covers three cases: no
+ * Firebase config at all, a project whose catalogue has not been imported
+ * yet, and a read that simply fails. Orders, accounts and reviews get no
+ * such net — those must be real or fail loudly.
  */
 interface Seed {
   categories: Category[]
@@ -53,6 +55,24 @@ const seed = () => {
   return seedPromise
 }
 
+/** Empty enough that the seed is a better answer than what Firestore returned. */
+const blank = (v: unknown) =>
+  v == null ||
+  (Array.isArray(v) && v.length === 0) ||
+  (typeof v === 'object' && !Array.isArray(v) && Object.keys(v as object).length === 0)
+
+async function catalogue<T>(live: () => Promise<T>, fromSeed: (s: Seed) => T): Promise<T> {
+  if (firebaseReady) {
+    try {
+      const out = await live()
+      if (!blank(out)) return out
+    } catch (err) {
+      console.warn('[catalogue] Firestore read failed — falling back to the bundled seed', err)
+    }
+  }
+  return fromSeed(await seed())
+}
+
 const millis = (v: unknown): number | null => {
   const t = v as { toMillis?: () => number } | null
   return t?.toMillis ? t.toMillis() : null
@@ -60,15 +80,17 @@ const millis = (v: unknown): number | null => {
 
 // ------------------------------------------------------------------ catalogue
 export async function listCategories(): Promise<Category[]> {
-  if (!firebaseReady) return (await seed()).categories
-  const snap = await getDocs(query(collection(db, 'categories'), orderBy('sortOrder')))
-  return snap.docs.map((d) => shape<Category>(d))
+  return catalogue(async () => {
+    const snap = await getDocs(query(collection(db, 'categories'), orderBy('sortOrder')))
+    return snap.docs.map((d) => shape<Category>(d))
+  }, (s) => s.categories)
 }
 
 export async function listBrands(): Promise<Brand[]> {
-  if (!firebaseReady) return (await seed()).brands
-  const snap = await getDocs(query(collection(db, 'brands'), orderBy('name')))
-  return snap.docs.map((d) => shape<Brand>(d))
+  return catalogue(async () => {
+    const snap = await getDocs(query(collection(db, 'brands'), orderBy('name')))
+    return snap.docs.map((d) => shape<Brand>(d))
+  }, (s) => s.brands)
 }
 
 /**
@@ -77,88 +99,112 @@ export async function listBrands(): Promise<Brand[]> {
  * costs one query instead of one per filter change.
  */
 export async function listProducts(): Promise<Product[]> {
-  if (!firebaseReady) return (await seed()).products
-  const snap = await getDocs(
-    query(collection(db, 'products'), where('isActive', '==', true), orderBy('sortOrder')),
-  )
-  return snap.docs.map((d) => shape<Product>(d))
+  return catalogue(async () => {
+    const snap = await getDocs(
+      query(collection(db, 'products'), where('isActive', '==', true), orderBy('sortOrder')),
+    )
+    return snap.docs.map((d) => shape<Product>(d))
+  }, (s) => s.products)
 }
 
 export async function listFeatured(n = 8): Promise<Product[]> {
-  if (!firebaseReady) return (await seed()).products.filter((p) => p.isFeatured).slice(0, n)
-  const snap = await getDocs(
-    query(
-      collection(db, 'products'),
-      where('isActive', '==', true),
-      where('isFeatured', '==', true),
-      fsLimit(n),
-    ),
+  return catalogue(
+    async () => {
+      const snap = await getDocs(
+        query(
+          collection(db, 'products'),
+          where('isActive', '==', true),
+          where('isFeatured', '==', true),
+          fsLimit(n),
+        ),
+      )
+      return snap.docs.map((d) => shape<Product>(d))
+    },
+    (s) => s.products.filter((p) => p.isFeatured).slice(0, n),
   )
-  return snap.docs.map((d) => shape<Product>(d))
 }
 
 export async function listNewest(n = 8): Promise<Product[]> {
-  if (!firebaseReady)
-    return [...(await seed()).products].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, n)
-  const snap = await getDocs(
-    query(
-      collection(db, 'products'),
-      where('isActive', '==', true),
-      orderBy('sortOrder', 'desc'),
-      fsLimit(n),
-    ),
+  return catalogue(
+    async () => {
+      const snap = await getDocs(
+        query(
+          collection(db, 'products'),
+          where('isActive', '==', true),
+          orderBy('sortOrder', 'desc'),
+          fsLimit(n),
+        ),
+      )
+      return snap.docs.map((d) => shape<Product>(d))
+    },
+    (s) => [...s.products].sort((a, b) => b.sortOrder - a.sortOrder).slice(0, n),
   )
-  return snap.docs.map((d) => shape<Product>(d))
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  if (!firebaseReady) return (await seed()).products.find((p) => p.slug === slug) ?? null
-  const snap = await getDoc(doc(db, 'products', slug))
-  if (!snap.exists() || snap.data().isActive === false) return null
-  return { id: snap.id, ...snap.data() } as Product
+  return catalogue(
+    async () => {
+      const snap = await getDoc(doc(db, 'products', slug))
+      if (!snap.exists() || snap.data().isActive === false) return null
+      return { id: snap.id, ...snap.data() } as Product
+    },
+    (s) => s.products.find((p) => p.slug === slug) ?? null,
+  )
 }
 
 export async function listRelated(categorySlug: string | null, exceptSlug: string, n = 4) {
   if (!categorySlug) return []
-  if (!firebaseReady)
-    return (await seed()).products
-      .filter((p) => p.categorySlug === categorySlug && p.slug !== exceptSlug)
-      .slice(0, n)
-  const snap = await getDocs(
-    query(
-      collection(db, 'products'),
-      where('isActive', '==', true),
-      where('categorySlug', '==', categorySlug),
-      fsLimit(n + 1),
-    ),
+  return catalogue(
+    async () => {
+      const snap = await getDocs(
+        query(
+          collection(db, 'products'),
+          where('isActive', '==', true),
+          where('categorySlug', '==', categorySlug),
+          fsLimit(n + 1),
+        ),
+      )
+      return snap.docs
+        .map((d) => shape<Product>(d))
+        .filter((p) => p.slug !== exceptSlug)
+        .slice(0, n)
+    },
+    (s) =>
+      s.products
+        .filter((p) => p.categorySlug === categorySlug && p.slug !== exceptSlug)
+        .slice(0, n),
   )
-  return snap.docs
-    .map((d) => shape<Product>(d))
-    .filter((p) => p.slug !== exceptSlug)
-    .slice(0, n)
 }
 
 export async function listBySlugs(slugs: string[]): Promise<Product[]> {
   if (slugs.length === 0) return []
-  if (!firebaseReady) return (await seed()).products.filter((p) => slugs.includes(p.slug))
-  // `in` takes up to 30 values per query, so chunk for bigger wishlists.
-  const chunks: string[][] = []
-  for (let i = 0; i < slugs.length; i += 30) chunks.push(slugs.slice(i, i + 30))
-  const results = await Promise.all(
-    chunks.map((c) =>
-      getDocs(query(collection(db, 'products'), where('slug', 'in', c))).then((s) =>
-        s.docs.map((d) => shape<Product>(d)),
-      ),
-    ),
+  return catalogue(
+    async () => {
+      // `in` takes up to 30 values per query, so chunk for bigger wishlists.
+      const chunks: string[][] = []
+      for (let i = 0; i < slugs.length; i += 30) chunks.push(slugs.slice(i, i + 30))
+      const results = await Promise.all(
+        chunks.map((c) =>
+          getDocs(query(collection(db, 'products'), where('slug', 'in', c))).then((s) =>
+            s.docs.map((d) => shape<Product>(d)),
+          ),
+        ),
+      )
+      return results.flat()
+    },
+    (s) => s.products.filter((p) => slugs.includes(p.slug)),
   )
-  return results.flat()
 }
 
 // ------------------------------------------------------------------ settings
 export async function loadSettings() {
-  if (!firebaseReady) return (await seed()).settings
-  const snap = await getDocs(collection(db, 'settings'))
-  return Object.fromEntries(snap.docs.map((d) => [d.id, d.data()])) as Record<string, unknown>
+  return catalogue(
+    async () => {
+      const snap = await getDocs(collection(db, 'settings'))
+      return Object.fromEntries(snap.docs.map((d) => [d.id, d.data()])) as Record<string, unknown>
+    },
+    (s) => s.settings,
+  )
 }
 
 // ------------------------------------------------------------------- reviews

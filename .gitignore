@@ -28,3 +28,4 @@ firebase/service-account.json
 .firebase/
 functions/node_modules/
 *-debug.log
+.env

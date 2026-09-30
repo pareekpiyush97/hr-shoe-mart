@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Check, Loader2, Search } from 'lucide-react'
 import { trackOrder } from '../lib/db'
+import { functionsReady } from '../lib/firebase'
+import { useSettings, waLink } from '../lib/settings'
+import { MessageCircle } from 'lucide-react'
 import { cx, inr, when } from '../lib/format'
 import { Alert } from '../components/ui'
 import type { TrackedOrder } from '../lib/types'
@@ -17,6 +20,7 @@ const LABEL: Record<string, string> = {
 
 
 export default function Track() {
+  const { store } = useSettings()
   const [params] = useSearchParams()
   const [orderNo, setOrderNo] = useState(params.get('order') ?? '')
   const [phone, setPhone] = useState('')
@@ -45,6 +49,25 @@ export default function Track() {
 
   const step = order ? STEPS.indexOf(order.status) : -1
   const cancelled = order?.status === 'cancelled'
+
+  if (!functionsReady)
+    return (
+      <div className="shell max-w-lg py-16 text-center">
+        <h1 className="text-3xl">Order tracking WhatsApp par</h1>
+        <p className="mt-3 text-sm leading-relaxed text-inksoft">
+          Abhi orders WhatsApp par liye ja rahe hain, isliye status bhi wahin milega. Apna order
+          number ya mobile bhej dijiye, hum turant bata denge ki kahan tak pahuncha.
+        </p>
+        <a
+          href={waLink(store.whatsapp, `Namaste ${store.name}! Mere order ka status bata dijiye.`)}
+          target="_blank"
+          rel="noreferrer"
+          className="btn mt-7 bg-moss text-bone hover:brightness-110"
+        >
+          <MessageCircle size={16} /> WhatsApp par poochhein
+        </a>
+      </div>
+    )
 
   return (
     <div className="shell max-w-3xl py-12">
